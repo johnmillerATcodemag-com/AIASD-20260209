@@ -1,7 +1,7 @@
 # .gitignore for C# / .NET projects
 # Build results
 **/bin/
-**/obj/
+**/dotnet nuget add source https://api.nuget.org/v3/index.json --name nuget.orgobj/
 
 # User-specific files
 *.user
