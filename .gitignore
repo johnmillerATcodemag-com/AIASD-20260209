@@ -36,6 +36,10 @@ TestResults/
 *.tmp
 *.temp
 
+# Ignore generated editor config and assembly info
+lab1-3-csharp/obj/Debug/net8.0/BookLibrary.GeneratedMSBuildEditorConfig.editorconfig
+lab1-3-csharp/obj/Debug/net8.0/BookLibrary.AssemblyInfo.cs
+
 # Ignore Mac files
 .DS_Store
 
