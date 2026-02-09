@@ -1,7 +1,7 @@
 # .gitignore for C# / .NET projects
 # Build results
-bin/
-obj/
+**/bin/
+**/obj/
 
 # User-specific files
 *.user
