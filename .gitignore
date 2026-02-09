@@ -1,0 +1,43 @@
+# .gitignore for C# / .NET projects
+# Build results
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code
+.vscode/
+
+# NuGet
+*.nupkg
+# Packages folder
+packages/
+# NuGet restore result
+project.lock.json
+project.assets.json
+
+# Others
+*.log
+*.vs/
+
+# Resharper
+*.resharper
+*.DotSettings
+
+# Test results
+TestResults/
+
+# Temporary files
+~$*
+*.tmp
+*.temp
+
+# Ignore Mac files
+.DS_Store
+
+# Ignore Windows thumbnail cache files
+Thumbs.db
