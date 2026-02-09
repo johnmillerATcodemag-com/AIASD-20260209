@@ -14,11 +14,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\git\\AIASD\\AI-Assisted-Software-Development-Course\\Labs\\lab1-3-csharp\\BookLibrary.csproj",
+      "projectUniqueName": "C:\\git\\AIASD\\AIASD-20260209\\lab1-3-csharp\\BookLibrary.csproj",
       "projectName": "BookLibrary",
-      "projectPath": "C:\\git\\AIASD\\AI-Assisted-Software-Development-Course\\Labs\\lab1-3-csharp\\BookLibrary.csproj",
+      "projectPath": "C:\\git\\AIASD\\AIASD-20260209\\lab1-3-csharp\\BookLibrary.csproj",
       "packagesPath": "C:\\Users\\JohnM\\.nuget\\packages\\",
-      "outputPath": "C:\\git\\AIASD\\AI-Assisted-Software-Development-Course\\Labs\\lab1-3-csharp\\obj\\",
+      "outputPath": "C:\\git\\AIASD\\AIASD-20260209\\lab1-3-csharp\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
