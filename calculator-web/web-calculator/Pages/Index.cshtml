@@ -1,0 +1,251 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Calculator";
+}
+
+<div class="calculator-container">
+    <form method="post" id="calcForm">
+        <div class="calculator">
+            <div class="history-section">
+                <div class="history-header">
+                    <span>History</span>
+                    <button type="button" class="clear-history-btn" onclick="clearHistory()" title="Clear History">🗑️</button>
+                </div>
+                <div id="calculationHistory" class="history-list"></div>
+            </div>
+            <div class="display">
+                <input type="text" id="expression" name="expression" value="@Model.Expression" readonly />
+            </div>
+
+            <div class="memory-buttons">
+                <button type="button" class="memory-btn" onclick="memoryClear()">MC</button>
+                <button type="button" class="memory-btn" onclick="memoryRecall()">MR</button>
+                <button type="button" class="memory-btn" onclick="memoryAdd()">M+</button>
+                <button type="button" class="memory-btn" onclick="memorySubtract()">M−</button>
+                <button type="button" class="memory-btn" onclick="memoryStore()">MS</button>
+                <button type="button" class="memory-btn" onclick="memoryView()">M▼</button>
+            </div>
+            <div id="memoryIndicator" class="memory-indicator" style="display:none;">
+                Memory: <span id="memoryValue">0</span>
+            </div>
+
+            <div class="button-row">
+                <button type="button" class="calc-btn" onclick="appendDigit('%')">%</button>
+                <button type="button" class="calc-btn" onclick="clearEntry()">CE</button>
+                <button type="submit" name="clear" value="true" class="calc-btn">C</button>
+                <button type="button" class="calc-btn" onclick="backspace()">⌫</button>
+            </div>
+
+            <div class="button-row">
+                <button type="button" class="calc-btn" onclick="appendFunction('1/')">¹⁄ₓ</button>
+                <button type="button" class="calc-btn" onclick="appendFunction('^2')">x²</button>
+                <button type="button" class="calc-btn" onclick="appendFunction('sqrt(')">²√x</button>
+                <button type="button" class="calc-btn operator" onclick="appendDigit('/')">÷</button>
+            </div>
+
+            <div class="button-row">
+                <button type="button" class="calc-btn" onclick="appendDigit('7')">7</button>
+                <button type="button" class="calc-btn" onclick="appendDigit('8')">8</button>
+                <button type="button" class="calc-btn" onclick="appendDigit('9')">9</button>
+                <button type="button" class="calc-btn operator" onclick="appendDigit('*')">×</button>
+            </div>
+
+            <div class="button-row">
+                <button type="button" class="calc-btn" onclick="appendDigit('4')">4</button>
+                <button type="button" class="calc-btn" onclick="appendDigit('5')">5</button>
+                <button type="button" class="calc-btn" onclick="appendDigit('6')">6</button>
+                <button type="button" class="calc-btn operator" onclick="appendDigit('-')">−</button>
+            </div>
+
+            <div class="button-row">
+                <button type="button" class="calc-btn" onclick="appendDigit('1')">1</button>
+                <button type="button" class="calc-btn" onclick="appendDigit('2')">2</button>
+                <button type="button" class="calc-btn" onclick="appendDigit('3')">3</button>
+                <button type="button" class="calc-btn operator" onclick="appendDigit('+')">+</button>
+            </div>
+
+            <div class="button-row">
+                <button type="button" class="calc-btn" onclick="toggleSign()">+/−</button>
+                <button type="button" class="calc-btn" onclick="appendDigit('0')">0</button>
+                <button type="button" class="calc-btn" onclick="appendDigit('.')">.</button>
+                <button type="submit" class="calc-btn equals">=</button>
+            </div>
+        </div>
+    </form>
+
+    <script>
+            // Memory functions with localStorage persistence
+            function getMemory() {
+                const stored = localStorage.getItem('calculatorMemory');
+                return stored ? parseFloat(stored) : 0;
+            }
+
+            function setMemory(value) {
+                localStorage.setItem('calculatorMemory', value.toString());
+                updateMemoryDisplay();
+            }
+
+            function updateMemoryDisplay() {
+                const memory = getMemory();
+                const indicator = document.getElementById('memoryIndicator');
+                const valueSpan = document.getElementById('memoryValue');
+
+                if (memory !== 0) {
+                    indicator.style.display = 'block';
+                    valueSpan.textContent = memory;
+                } else {
+                    indicator.style.display = 'none';
+                }
+            }
+
+            function appendDigit(digit) {
+                var input = document.getElementById('expression');
+                input.value += digit;
+            }
+
+            function appendFunction(func) {
+                var input = document.getElementById('expression');
+                input.value += func;
+            }
+
+            function clearEntry() {
+                var input = document.getElementById('expression');
+                input.value = '';
+            }
+
+            function backspace() {
+                var input = document.getElementById('expression');
+                input.value = input.value.slice(0, -1);
+            }
+
+            function toggleSign() {
+                var input = document.getElementById('expression');
+                if (input.value.startsWith('-')) {
+                    input.value = input.value.substring(1);
+                } else {
+                    input.value = '-' + input.value;
+                }
+            }
+
+            // Memory Store - stores current display value in memory
+            function memoryStore() {
+                var input = document.getElementById('expression');
+                const value = parseFloat(input.value) || 0;
+                setMemory(value);
+            }
+
+            // Memory Recall - recalls memory value to display
+            function memoryRecall() {
+                var input = document.getElementById('expression');
+                const memory = getMemory();
+                input.value = memory.toString();
+            }
+
+            // Memory Clear - clears memory
+            function memoryClear() {
+                setMemory(0);
+            }
+
+            // Memory Add - adds current display value to memory
+            function memoryAdd() {
+                var input = document.getElementById('expression');
+                const currentValue = parseFloat(input.value) || 0;
+                const memory = getMemory();
+                const newMemory = memory + currentValue;
+                setMemory(newMemory);
+            }
+
+            // Memory Subtract - subtracts current display value from memory
+            function memorySubtract() {
+                var input = document.getElementById('expression');
+                const currentValue = parseFloat(input.value) || 0;
+                const memory = getMemory();
+                const newMemory = memory - currentValue;
+                setMemory(newMemory);
+            }
+
+            // Memory View - displays current memory value
+            function memoryView() {
+                const memory = getMemory();
+                // Memory value is already shown in the indicator above
+            }
+
+            // Calculation History functions
+            function getHistory() {
+                const stored = localStorage.getItem('calculatorHistory');
+                return stored ? JSON.parse(stored) : [];
+            }
+
+            function saveHistory(history) {
+                localStorage.setItem('calculatorHistory', JSON.stringify(history));
+            }
+
+            function addToHistory(expression, result) {
+                const history = getHistory();
+                const entry = {
+                    expression: expression,
+                    result: result,
+                    timestamp: new Date().toLocaleTimeString()
+                };
+                history.unshift(entry); // Add to beginning
+                // Keep only last 10 calculations
+                if (history.length > 10) {
+                    history.pop();
+                }
+                saveHistory(history);
+                displayHistory();
+            }
+
+            function displayHistory() {
+                const history = getHistory();
+                const historyList = document.getElementById('calculationHistory');
+
+                if (history.length === 0) {
+                    historyList.innerHTML = '<div class="no-history">No calculations yet</div>';
+                    return;
+                }
+
+                historyList.innerHTML = history.map(entry => `
+                    <div class=\"history-item\" onclick=\"loadFromHistory('${entry.result}')\" title=\"Click to use this result\">
+                        <div class=\"history-expression\">${entry.expression}</div>
+                        <div class=\"history-result\">= ${entry.result}</div>
+                        <div class=\"history-time\">${entry.timestamp}</div>
+                    </div>
+                `).join('');
+            }
+
+            function loadFromHistory(result) {
+                var input = document.getElementById('expression');
+                input.value = result;
+            }
+
+            function clearHistory() {
+                if (confirm('Clear all calculation history?')) {
+                    localStorage.removeItem('calculatorHistory');
+                    displayHistory();
+                }
+            }
+
+            // Initialize memory display and history on page load
+            document.addEventListener('DOMContentLoaded', function () {
+                updateMemoryDisplay();
+                displayHistory();
+
+                // Add calculation to history if there's a result
+                @if (Model.Result != null && Model.PreviousExpression != null)
+                {
+                    <text>
+                    addToHistory('@Html.Raw(Model.PreviousExpression)', '@Html.Raw(Model.Result)');
+                    </text>
+                }
+            });
+    </script>
+
+    @if (Model.ErrorMessage != null)
+    {
+        <div class="error-display">
+            <p>@Model.ErrorMessage</p>
+        </div>
+    }
+</div>

@@ -1,0 +1,15 @@
+C:\git\AIASD\AIASD-20260209\calculator\bin\Debug\net9.0\calculator.exe
+C:\git\AIASD\AIASD-20260209\calculator\bin\Debug\net9.0\calculator.deps.json
+C:\git\AIASD\AIASD-20260209\calculator\bin\Debug\net9.0\calculator.runtimeconfig.json
+C:\git\AIASD\AIASD-20260209\calculator\bin\Debug\net9.0\calculator.dll
+C:\git\AIASD\AIASD-20260209\calculator\bin\Debug\net9.0\calculator.pdb
+C:\git\AIASD\AIASD-20260209\calculator\obj\Debug\net9.0\calculator.GeneratedMSBuildEditorConfig.editorconfig
+C:\git\AIASD\AIASD-20260209\calculator\obj\Debug\net9.0\calculator.AssemblyInfoInputs.cache
+C:\git\AIASD\AIASD-20260209\calculator\obj\Debug\net9.0\calculator.AssemblyInfo.cs
+C:\git\AIASD\AIASD-20260209\calculator\obj\Debug\net9.0\calculator.csproj.CoreCompileInputs.cache
+C:\git\AIASD\AIASD-20260209\calculator\obj\Debug\net9.0\calculator.sourcelink.json
+C:\git\AIASD\AIASD-20260209\calculator\obj\Debug\net9.0\calculator.dll
+C:\git\AIASD\AIASD-20260209\calculator\obj\Debug\net9.0\refint\calculator.dll
+C:\git\AIASD\AIASD-20260209\calculator\obj\Debug\net9.0\calculator.pdb
+C:\git\AIASD\AIASD-20260209\calculator\obj\Debug\net9.0\calculator.genruntimeconfig.cache
+C:\git\AIASD\AIASD-20260209\calculator\obj\Debug\net9.0\ref\calculator.dll
