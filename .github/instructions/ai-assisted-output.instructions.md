@@ -33,6 +33,7 @@ This repository requires clear provenance and reliable logging for all AI-assist
 - [Overview](#overview)
 - [Audience](#audience)
 - [Scope](#scope)
+- [Applicability](#applicability)
 - [Terminology](#terminology)
 - [Metadata placement policy](#metadata-placement-policy)
 - [Required provenance metadata (for every AI-assisted artifact)](#required-provenance-metadata-for-every-ai-assisted-artifact)
@@ -70,6 +71,35 @@ Contributors generating or curating AI-assisted content (code, docs, diagrams, t
 - Emphasize automatic chat management, context-aware logging, and artifact protection before any artifact is created.
 - **Require that all AI-assisted artifacts be primarily targeted at AI agents for consumption and processing.**
 - **Require optimization of artifacts to minimize token consumption while maintaining completeness and clarity.**
+
+## Applicability
+
+**🔒 CRITICAL**: This policy applies **ONLY** to AI-generated or AI-assisted content.
+
+### When This Policy Applies
+
+This policy and all its requirements apply when:
+
+- ✅ **AI tools were used** to generate, modify, or assist in creating content (code, documentation, diagrams, etc.)
+- ✅ **Any part of the artifact** was created with AI assistance (GitHub Copilot, ChatGPT, Claude, etc.)
+- ✅ The file contains or should contain `ai_generated: true` in its metadata
+
+### When This Policy Does NOT Apply
+
+This policy does **NOT** apply to:
+
+- ❌ **Human-written content** created entirely without AI assistance
+- ❌ **Manual code changes** made by developers without AI tools
+- ❌ **Human-authored documentation** written without AI help
+- ❌ Files without `ai_generated: true` metadata
+
+### Summary
+
+**Human-created PRs**: Developers can freely create pull requests with human-written code following standard development practices. No AI provenance requirements apply.
+
+**AI-assisted PRs**: Any PR containing AI-generated or AI-assisted content must meet all requirements in this document (metadata, conversation logs, summaries, README updates, etc.).
+
+**CI Enforcement**: The CI pipeline only checks and enforces AI provenance requirements when it detects `ai_generated: true` in a file's metadata. Files without this flag are not subject to these checks.
 
 ## Terminology
 
@@ -845,78 +875,52 @@ jobs:
         with:
           fetch-depth: 0
 
-      # AI Provenance Validation
-      - name: Determine changed Markdown files
+      # AI Provenance Validation using AI Prompt
+      - name: Get changed files
+        id: changed-files
         run: |
           git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
           CHANGED=$(git diff --name-only --diff-filter=ACMRT "origin/${{ github.base_ref }}...HEAD" | grep -E '\\.md$' || true)
-          echo "$CHANGED" > changed_md.txt
+          echo "files<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGED" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Validate AI provenance (front matter and ai-logs linkage)
-        run: |
-          set -euo pipefail
-          rc=0
-          while IFS= read -r f; do
-            [ -z "$f" ] && continue
-            [ ! -f "$f" ] && continue
+      - name: AI-Powered Provenance Validation
+        uses: github/copilot-actions/validate-ai-provenance@v1
+        with:
+          changed-files: ${{ steps.changed-files.outputs.files }}
+          validation-prompt: |
+            You are an AI provenance validator. Analyze the provided files and verify:
 
-            # Extract YAML front matter
-            awk '
-              BEGIN{in=0; n=0}
-              /^---[[:space:]]*$/ { n++; if (n==1) {in=1; next} else if (n==2) {in=0; exit} }
-              in { print }
-            ' "$f" > fm.yml || true
+            1. **For NEW AI-generated files** (with `ai_generated: true`):
+               - Must have `chat_id` field
+               - Must have `ai_log` field pointing to existing conversation log
+               - Must have `model`, `operator`, `prompt`, `started`, `ended` fields
+               - Must have `task_durations` and `total_duration`
+               - The `ai_log` path must exist in the repository
+               - Must have `source` field identifying who/what created it
 
-            # Only enforce when ai_generated: true
-            if grep -qiE '^ai_generated:[[:space:]]*true[[:space:]]*$' fm.yml; then
-              # Require chat_id and ai_log
-              if ! grep -qE '^chat_id:' fm.yml; then
-                echo "::error file=$f::Missing 'chat_id' in front matter"
-                rc=1
-              fi
-              if ! grep -qE '^ai_log:' fm.yml; then
-                echo "::error file=$f::Missing 'ai_log' in front matter"
-                rc=1
-              else
-                # Verify the referenced ai_log path exists
-                ai_log=$(awk -F':' '/^ai_log:[[:space:]]*/{sub(/^[[:space:]]*/,"",$2); print $2}' fm.yml | sed 's/^ *//; s/^"//; s/"$//')
-                if [ -z "$ai_log" ] || [ ! -f "$ai_log" ]; then
-                  echo "::error file=$f::ai_log path missing or not found: $ai_log"
-                  rc=1
-                fi
-              fi
+            2. **For MODIFIED AI-generated files**:
+               - Original creation metadata must remain unchanged
+               - Must have `update_history` array with new entry
+               - Each update entry must have: `update_number`, `chat_id`, `operator`, `model`, `updated`, `duration`, `ai_log`, `changes`, `files_referenced`
+               - Update numbers must be sequential (1, 2, 3, ...)
+               - Each update must have its own unique `chat_id`
+               - All referenced `ai_log` paths must exist
 
-              # Check if this is a modification (file existed in base branch)
-              if git show "origin/${{ github.base_ref }}:$f" > /dev/null 2>&1; then
-                # This is an update - verify update_history exists and is valid
-                if grep -qE '^update_history:' fm.yml; then
-                  # Extract and verify each update entry's ai_log
-                  update_logs=$(awk '/^update_history:/,/^[a-z_]+:/ {if (/ai_log:/) print}' fm.yml | awk -F':' '{sub(/^[[:space:]]*/,"",$2); sub(/^[[:space:]]*/,"",$3); print $2":"$3}' | sed 's/^ *//; s/^"//; s/"$//')
-                  for update_log in $update_logs; do
-                    if [ -n "$update_log" ] && [ ! -f "$update_log" ]; then
-                      echo "::error file=$f::Update ai_log path not found: $update_log"
-                      rc=1
-                    fi
-                  done
-                  # Verify update_number sequence
-                  update_nums=$(awk '/^update_history:/,/^[a-z_]+:/ {if (/update_number:/) print}' fm.yml | awk '{print $2}')
-                  expected=1
-                  for num in $update_nums; do
-                    if [ "$num" -ne "$expected" ]; then
-                      echo "::error file=$f::Invalid update_number sequence: expected $expected, found $num"
-                      rc=1
-                    fi
-                    expected=$((expected + 1))
-                  done
-                else
-                  echo "::error file=$f::AI-assisted file modified without update_history entry"
-                  rc=1
-                fi
-              fi
-            fi
-            rm -f fm.yml || true
-          done < changed_md.txt
-          exit $rc
+            3. **For files WITHOUT `ai_generated: true`**:
+               - No validation required (human-created content)
+
+            For each violation found, output in GitHub Actions error format:
+            ::error file={filename}::{error description}
+
+            If all validations pass, output:
+            ✅ All AI provenance requirements met
+
+            Exit with code 0 if valid, 1 if any violations found.
+          policy-file: .github/instructions/ai-assisted-output.instructions.md
+          base-ref: ${{ github.base_ref }}
+          fail-on-error: true
 
   # Security Scanning
   security-scans:
