@@ -40,6 +40,9 @@ builder.Services.AddSingleton<Library>(sp =>
     return library;
 });
 
+// Register metrics service
+builder.Services.AddSingleton<LibraryMetrics>();
+
 // Add health checks
 builder.Services.AddHealthChecks()
     .AddCheck<LibraryHealthCheck>("library_health", tags: new[] { "ready" });
@@ -59,6 +62,7 @@ builder.Services.AddOpenTelemetry()
     .WithMetrics(meterProviderBuilder =>
     {
         meterProviderBuilder
+            .AddMeter("BookLibrary")
             .AddAspNetCoreInstrumentation()
             .AddConsoleExporter();
     });
