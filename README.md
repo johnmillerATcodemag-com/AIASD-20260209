@@ -246,11 +246,11 @@ C4Context
     title System Context Diagram - Web Calculator
 
     Person(user, "User", "A person who needs to perform mathematical calculations")
-    
+
     System(calculator, "Web Calculator", "Provides a web-based interface for evaluating mathematical expressions with support for basic arithmetic operations and operator precedence")
 
     Rel(user, calculator, "Performs calculations using", "HTTPS")
-    
+
     UpdateLayoutConfig($c4ShapeInRow="1", $c4BoundaryInRow="1")
 ```
 
@@ -263,7 +263,7 @@ C4Container
     title Container Diagram - Web Calculator
 
     Person(user, "User", "A person performing calculations")
-    
+
     Container_Boundary(c1, "Web Calculator System") {
         Container(webapp, "Web Application", "ASP.NET Core 9.0, Kestrel", "Delivers web-based calculator interface and handles calculation requests using Razor Pages architecture")
         Container(spa, "Web Browser", "HTML, CSS, JavaScript, Bootstrap 5.3", "Provides calculator UI to the user's web browser")
@@ -272,7 +272,7 @@ C4Container
     Rel(user, spa, "Uses", "HTTPS")
     Rel(spa, webapp, "Makes calculation requests to", "HTTPS/JSON")
     Rel(webapp, spa, "Returns calculation results", "HTML/JSON")
-    
+
     UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="1")
 ```
 
@@ -292,24 +292,27 @@ C4Component
 
     Rel(razorPages, serviceInterface, "Depends on", "DI container")
     Rel(serviceInterface, serviceImpl, "Implemented by", "C# interface")
-    
+
     UpdateLayoutConfig($c4ShapeInRow="1", $c4BoundaryInRow="1")
 ```
 
 ### Architecture Highlights
 
 **Layered Architecture**:
+
 - **Presentation Layer** (Razor Pages): Handles user interaction, request/response, model binding
 - **Service Layer** (Interface): Abstracts business logic, enables testability and DI
 - **Business Logic Layer** (Implementation): Core calculation algorithms and validation
 
 **Design Patterns**:
+
 - **Service Layer Pattern**: Separates business logic from presentation concerns
 - **Dependency Injection**: Loose coupling via constructor injection
 - **Result Type Pattern**: Explicit success/failure handling without exceptions for control flow
 - **Interface Segregation**: Clean abstraction boundaries between layers
 
 **Technology Choices**:
+
 - **Kestrel**: High-performance cross-platform web server
 - **Razor Pages**: Page-focused routing and organization for web UI
 - **Bootstrap 5.3**: Responsive, mobile-first CSS framework

@@ -66,13 +66,13 @@ if (!app.Environment.IsDevelopment())
     // UseExceptionHandler: Catches unhandled exceptions and redirects to /Error page
     // Prevents sensitive error details from being exposed to end users
     app.UseExceptionHandler("/Error");
-    
+
     // UseHsts: HTTP Strict Transport Security
     // Instructs browsers to only access the site over HTTPS
     // Default: 30 days. Consider extending to 1 year for production (max-age=31536000)
     // See: https://aka.ms/aspnetcore-hsts
     app.UseHsts();
-    
+
     // UseHttpsRedirection: Redirects HTTP requests to HTTPS
     // Ensures all traffic uses encrypted connections in production
     app.UseHttpsRedirection();

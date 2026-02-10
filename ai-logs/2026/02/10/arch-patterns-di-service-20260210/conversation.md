@@ -31,8 +31,8 @@ Service Layer Pattern - Separation of concerns with ICalculatorService interface
 [2026-02-10T12:05:00Z] anthropic/claude-3.5-sonnet@2024-10-22
 
 ```text
-I'll create a comprehensive instruction file covering Dependency Injection and Service Layer Pattern 
-standards for your .NET project. Let me examine the existing service implementation first to ensure 
+I'll create a comprehensive instruction file covering Dependency Injection and Service Layer Pattern
+standards for your .NET project. Let me examine the existing service implementation first to ensure
 the examples are accurate.
 
 [Examined ICalculatorService.cs, CalculatorService.cs, and Program.cs to understand current implementation]
