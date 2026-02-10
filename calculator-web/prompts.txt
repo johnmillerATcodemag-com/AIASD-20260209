@@ -1,0 +1,3 @@
+list 10 requirements for evergreen code
+
+@workspace review the code and report any areas that are not evergreen. Create github issues for the findings
