@@ -1,5 +1,6 @@
 **Problem:**
 Error messages expose internal implementation details to end users:
+
 - Exception stack traces may be visible
 - Exception messages like "Unable to evaluate expression: {ex.Message}" expose system details
 - No user-friendly error messages
@@ -7,6 +8,7 @@ Error messages expose internal implementation details to end users:
 
 **Current Behavior:**
 In IndexModel.OnPost():
+
 ```csharp
 catch (Exception ex)
 {
@@ -15,24 +17,28 @@ catch (Exception ex)
 ```
 
 This exposes internal exception messages that may contain:
+
 - Stack traces
 - System paths
 - Internal method names
 - Implementation details
 
 **Impact:**
+
 - Security information disclosure
 - Poor user experience
 - Difficult to provide support (no error codes)
 - May reveal attack surface to malicious users
 
 **Recommendation:**
+
 1. Create user-friendly error messages:
    - "Invalid expression. Please check your input."
    - "The expression is too complex to calculate."
    - "Cannot divide by zero."
 
 2. Log detailed errors server-side for debugging:
+
    ```csharp
    catch (InvalidOperationException ex)
    {

@@ -1,5 +1,6 @@
 **Problem:**
 The application lacks health checks and observability features:
+
 - No health check endpoints
 - No structured logging
 - No performance metrics
@@ -7,6 +8,7 @@ The application lacks health checks and observability features:
 - No readiness/liveness probes for containerization
 
 **Impact:**
+
 - Cannot monitor application health in production
 - Difficult to diagnose issues
 - No proactive alerting on failures
@@ -14,28 +16,33 @@ The application lacks health checks and observability features:
 - Unsuitable for Kubernetes/container orchestration without health endpoints
 
 **Current State:**
+
 - Basic logging via ILogger
 - No health check endpoints
 - No metrics collection
 - No distributed tracing
 
 **Recommendation:**
+
 1. Add health checks (Program.cs):
+
    ```csharp
    builder.Services.AddHealthChecks();
-   
+
    app.MapHealthChecks("/health");
    app.MapHealthChecks("/health/ready");
    app.MapHealthChecks("/health/live");
    ```
 
 2. Add structured logging with Serilog:
+
    ```csharp
-   builder.Host.UseSerilog((context, config) => 
+   builder.Host.UseSerilog((context, config) =>
        config.ReadFrom.Configuration(context.Configuration));
    ```
 
 3. Add Application Insights or OpenTelemetry:
+
    ```csharp
    builder.Services.AddApplicationInsightsTelemetry();
    ```
@@ -55,6 +62,7 @@ The application lacks health checks and observability features:
    - Distributed tracing with OpenTelemetry
 
 **Benefits:**
+
 - Production health monitoring
 - Better debugging capabilities
 - Proactive issue detection

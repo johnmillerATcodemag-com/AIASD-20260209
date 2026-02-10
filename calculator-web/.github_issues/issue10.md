@@ -1,37 +1,43 @@
 **Problem:**
 All user-facing text is hardcoded in English with no internationalization (i18n) support:
+
 - UI labels, buttons, and messages are hardcoded
 - Error messages are in English only
 - No support for different locales or cultures
 - No number formatting based on culture
 
 **Current Issues:**
+
 - Calculator button labels: hardcoded in Index.cshtml
 - Error messages: hardcoded in IndexModel.cs
 - JavaScript messages: hardcoded in inline script
 - No resource files (.resx) for localization
 
 **Impact:**
+
 - Cannot support non-English speaking users
 - Limited market reach
 - Difficult to add translations later (requires significant refactoring)
 - Number formats (decimal separators) not culturally appropriate
 
 **Recommendation:**
+
 1. Add resource files for localization:
    - Resources/Strings.resx (default English)
    - Resources/Strings.es.resx (Spanish)
    - Resources/Strings.fr.resx (French, etc.)
 
 2. Use IStringLocalizer in Razor pages:
+
    ```csharp
    @inject IStringLocalizer<IndexModel> Localizer
    <button>@Localizer["Calculate"]</button>
    ```
 
 3. Configure localization in Program.cs:
+
    ```csharp
-   builder.Services.AddLocalization(options => 
+   builder.Services.AddLocalization(options =>
        options.ResourcesPath = "Resources");
    ```
 

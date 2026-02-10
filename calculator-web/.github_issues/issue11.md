@@ -1,5 +1,6 @@
 **Problem:**
 The application has no Continuous Integration/Continuous Deployment (CI/CD) pipeline:
+
 - No automated builds on commits
 - No automated test execution
 - No code quality checks
@@ -7,6 +8,7 @@ The application has no Continuous Integration/Continuous Deployment (CI/CD) pipe
 - Manual builds are error-prone and inconsistent
 
 **Impact:**
+
 - Quality issues may slip into production
 - Inconsistent build process across developers
 - No automated testing before merge
@@ -14,13 +16,16 @@ The application has no Continuous Integration/Continuous Deployment (CI/CD) pipe
 - Longer time to detect and fix issues
 
 **Current State:**
+
 - No .github/workflows directory
 - No CI/CD configuration
 - No automated testing on pull requests
 - No build status badges
 
 **Recommendation:**
+
 1. Create GitHub Actions workflow (.github/workflows/dotnet.yml):
+
    ```yaml
    name: .NET Build and Test
    on: [push, pull_request]
@@ -28,13 +33,13 @@ The application has no Continuous Integration/Continuous Deployment (CI/CD) pipe
      build:
        runs-on: ubuntu-latest
        steps:
-       - uses: actions/checkout@v3
-       - uses: actions/setup-dotnet@v3
-         with:
-           dotnet-version: '9.0.x'
-       - run: dotnet restore
-       - run: dotnet build --no-restore
-       - run: dotnet test --no-build --verbosity normal
+         - uses: actions/checkout@v3
+         - uses: actions/setup-dotnet@v3
+           with:
+             dotnet-version: "9.0.x"
+         - run: dotnet restore
+         - run: dotnet build --no-restore
+         - run: dotnet test --no-build --verbosity normal
    ```
 
 2. Add code quality checks:
