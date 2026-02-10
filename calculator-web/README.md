@@ -39,6 +39,8 @@ This project follows specific development practices defined in instruction files
 
 ### Instruction Files
 
+#### General Development
+
 - **[AI-Assisted Output Instructions](.github/instructions/ai-assisted-output.instructions.md)** - Defines provenance requirements and logging workflow for all AI-assisted content. All AI-generated artifacts must include complete metadata and conversation logs. ([AI Log](ai-logs/2026/01/20/generate-ai-output-policy-20260120/conversation.md))
 
 - **[Evergreen Software Development Instructions](.github/instructions/evergreen-software.instructions.md)** - Comprehensive guide for maintaining continuously fresh, secure, and maintainable software through proactive practices including dependency management, code modernization, technical debt paydown, and security maintenance. Includes daily, weekly, monthly, quarterly, and annual checklists for sustainable software maintenance. ([AI Log](ai-logs/2026/02/10/create-evergreen-software-instructions-20260210/conversation.md))
@@ -48,6 +50,16 @@ This project follows specific development practices defined in instruction files
 - **[Instruction Files Instructions](.github/instructions/instruction-files.instructions.md)** - Meta-instructions for creating and maintaining instruction files
 
 - **[Prompt File Instructions](.github/instructions/prompt-file.instructions.md)** - Guidelines for creating and using `.prompt.md` files for reusable AI prompts
+
+#### Backend Technologies
+
+- **[.NET 9.0 Instructions](.github/instructions/dotnet-9.instructions.md)** - Complete guide for .NET 9.0 features including nullable reference types, implicit usings, file-scoped namespaces, primary constructors, async/await patterns, testing with xUnit, performance optimization, and security practices. ([AI Log](ai-logs/2026/02/10/backend-tech-instructions-20260210/conversation.md))
+
+- **[ASP.NET Core Razor Pages Instructions](.github/instructions/aspnetcore-razorpages.instructions.md)** - Comprehensive Razor Pages guidance covering project structure, Program.cs configuration, page models, routing, model binding, validation, tag helpers, layouts, middleware pipeline, error handling, security, and performance optimization. ([AI Log](ai-logs/2026/02/10/backend-tech-instructions-20260210/conversation.md))
+
+- **[C# Coding Standards Instructions](.github/instructions/csharp-coding-standards.instructions.md)** - C# coding conventions including naming standards, code organization, formatting rules, modern language features, documentation requirements, error handling patterns, LINQ best practices, and EditorConfig configuration. ([AI Log](ai-logs/2026/02/10/backend-tech-instructions-20260210/conversation.md))
+
+- **[Dependency Injection Instructions](.github/instructions/dependency-injection.instructions.md)** - Dependency injection patterns and best practices covering service lifetimes (Transient, Scoped, Singleton), interface-based design, constructor injection, Options pattern, generic services, testing with DI, and common patterns including Unit of Work and Decorator patterns. ([AI Log](ai-logs/2026/02/10/backend-tech-instructions-20260210/conversation.md))
 
 ### Prompt Files
 
