@@ -1,0 +1,57 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Web Calculator</h1>
+    <form method="post">
+        <label for="expression">Enter expression:</label>
+        <input type="text" id="expression" name="expression" value="@Model.Expression" />
+        <button type="submit">Evaluate</button>
+        <button type="submit" name="clear" value="true">Clear</button>
+        <div style="margin:20px auto; width:220px;">
+            <div>
+                <button type="button" onclick="appendDigit('7')">7</button>
+                <button type="button" onclick="appendDigit('8')">8</button>
+                <button type="button" onclick="appendDigit('9')">9</button>
+            </div>
+            <div>
+                <button type="button" onclick="appendDigit('4')">4</button>
+                <button type="button" onclick="appendDigit('5')">5</button>
+                <button type="button" onclick="appendDigit('6')">6</button>
+            </div>
+            <div>
+                <button type="button" onclick="appendDigit('1')">1</button>
+                <button type="button" onclick="appendDigit('2')">2</button>
+                <button type="button" onclick="appendDigit('3')">3</button>
+            </div>
+            <div>
+                <button type="button" onclick="appendDigit('0')">0</button>
+                <button type="button" onclick="appendDigit('.')">.</button>
+            </div>
+            <div style="margin-top:10px;">
+                <button type="button" onclick="appendDigit('+')">+</button>
+                <button type="button" onclick="appendDigit('-')">-</button>
+                <button type="button" onclick="appendDigit('*')">*</button>
+                <button type="button" onclick="appendDigit('/')">/</button>
+                <button type="button" onclick="appendDigit('%')">%</button>
+            </div>
+        </div>
+    </form>
+    <script>
+            function appendDigit(digit) {
+                var input = document.getElementById('expression');
+                input.value += digit;
+            }
+    </script>
+    @if (Model.Result != null)
+    {
+        <p>Result: <strong>@Model.Result</strong></p>
+    }
+    @if (Model.ErrorMessage != null)
+    {
+        <p style="color:red;">@Model.ErrorMessage</p>
+    }
+</div>

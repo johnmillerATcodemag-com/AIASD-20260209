@@ -45,3 +45,5 @@ lab1-3-csharp/obj/Debug/net8.0/BookLibrary.AssemblyInfo.cs
 
 # Ignore Windows thumbnail cache files
 Thumbs.db
+
+**/obj/**
