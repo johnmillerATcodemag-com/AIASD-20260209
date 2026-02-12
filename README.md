@@ -12,6 +12,10 @@ This section documents artifacts created with AI assistance, including links to 
 
 - **[Web Calculator PRD](requirements/web-calculator-prd.md)** - Comprehensive Product Requirements Document for a web-based calculator application. Includes product vision, user personas, feature specifications, technical architecture, and launch plan. ([AI Log](ai-logs/2026/02/12/web-calc-prd-20260212-001/conversation.md))
 
+### Instruction Files
+
+- **[Vertical Slice Planning](.github/instructions/vertical-slice-planning.instructions.md)** - Comprehensive guide for planning and analyzing vertical slice architecture implementations. Covers requirements analysis, slice identification strategies, dependency mapping, implementation sequencing, and brownfield integration. ([AI Log](ai-logs/2026/02/12/vertical-slice-planning-instr-20260212/conversation.md))
+
 ## Repository Structure
 
 ```
@@ -29,6 +33,7 @@ AIASD-20260209/
 ## Getting Started
 
 This repository follows strict AI provenance tracking requirements. All AI-generated artifacts include:
+
 - YAML front matter with generation metadata
 - Links to conversation logs
 - Operator identification and timestamps
@@ -39,6 +44,7 @@ For details, see [AI-Assisted Output Instructions](.github/instructions/ai-assis
 ## Contributing
 
 When adding AI-assisted artifacts:
+
 1. Update this README with artifact description and link
 2. Follow the [instruction files](.github/instructions/) for compliance
 
@@ -49,4 +55,4 @@ When adding AI-assisted artifacts:
 
 ---
 
-*This repository is part of the AI-Assisted Software Development (AIASD) initiative.*
+_This repository is part of the AI-Assisted Software Development (AIASD) initiative._
