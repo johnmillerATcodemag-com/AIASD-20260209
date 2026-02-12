@@ -16,6 +16,8 @@ This section documents artifacts created with AI assistance, including links to 
 
 - **[Vertical Slice Planning](.github/instructions/vertical-slice-planning.instructions.md)** - Comprehensive guide for planning and analyzing vertical slice architecture implementations. Covers requirements analysis, slice identification strategies, dependency mapping, implementation sequencing, and brownfield integration. ([AI Log](ai-logs/2026/02/12/vertical-slice-planning-instr-20260212/conversation.md))
 
+- **[Web Technologies Standards](.github/instructions/web-technologies.instructions.md)** - Canonical standards and best practices for HTML5, CSS3, and Vanilla JavaScript development. Covers semantic markup, accessibility (WCAG 2.1 AA), modern CSS layouts (Grid/Flexbox), responsive design, JavaScript module patterns, state management, performance optimization, security, and testing. ([AI Log](ai-logs/2026/02/12/web-tech-instructions-20260212/conversation.md))
+
 ## Repository Structure
 
 ```
