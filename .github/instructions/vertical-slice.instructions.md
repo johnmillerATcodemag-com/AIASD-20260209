@@ -29,7 +29,6 @@ applyTo: "**/*.{cs,ts,js,py,java,go,rb}"
 This document provides instructions for AI assistants (GitHub Copilot, ChatGPT, Claude, etc.) when implementing code using vertical slice architecture. These instructions ensure AI-generated code follows vertical slice principles consistently and correctly.
 
 **Target Audience**: AI assistants generating or refactoring code
-**Related Documentation**: See [`.github/instructions/vertical-slice-architecture.instructions.md`](.github/instructions/vertical-slice-architecture.instructions.md) for comprehensive architecture guidance
 
 ## Table of Contents
 
