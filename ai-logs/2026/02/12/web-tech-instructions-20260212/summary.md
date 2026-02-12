@@ -23,6 +23,7 @@ Create a comprehensive instruction file defining standards and best practices fo
 ### Content Sections Created
 
 #### HTML5 Standards
+
 - **Semantic Markup**: Guidelines for using semantic HTML5 elements (`<header>`, `<nav>`, `<main>`, `<article>`, `<section>`, `<aside>`, `<footer>`, `<figure>`, `<time>`)
 - **Accessibility Requirements**: WCAG 2.1 AA compliance, ARIA labels and roles, keyboard accessibility, focus management
 - **Document Structure**: Proper HTML5 document setup, skip links, meta tags, script loading
@@ -30,6 +31,7 @@ Create a comprehensive instruction file defining standards and best practices fo
 - **Meta Tags and SEO**: Comprehensive meta tags including Open Graph and Twitter Card
 
 #### CSS3 Standards
+
 - **Modern Layout Systems**: CSS Grid for 2D layouts, Flexbox for 1D layouts with practical examples
 - **Responsive Design**: Mobile-first approach, responsive patterns, fluid typography, container queries
 - **Naming Conventions**: BEM (Block Element Modifier) methodology with examples
@@ -37,6 +39,7 @@ Create a comprehensive instruction file defining standards and best practices fo
 - **Browser Compatibility**: Progressive enhancement, feature queries, vendor prefixes
 
 #### Vanilla JavaScript Standards
+
 - **Code Organization**: Module pattern, separation of concerns, encapsulation
 - **DOM Manipulation**: Safe and efficient DOM operations, caching, batching
 - **Event Handling**: Event delegation, proper listener management, keyboard support
@@ -45,12 +48,14 @@ Create a comprehensive instruction file defining standards and best practices fo
 - **Performance Patterns**: Debouncing, throttling, memoization, requestAnimationFrame, lazy loading
 
 #### Cross-Cutting Concerns
+
 - **Security Best Practices**: Input sanitization, XSS prevention, Content Security Policy, secure storage
 - **Performance Budgets**: Specific targets (500KB total, 100KB JS, 50KB CSS, 1.5s FCP, 3s TTI)
 - **Testing Standards**: Unit tests, integration tests, 80% coverage requirement
 - **Progressive Enhancement**: Base functionality without JavaScript, feature detection
 
 ### Supporting Documentation
+
 - Created conversation log: `ai-logs/2026/02/12/web-tech-instructions-20260212/conversation.md`
 - Created session summary (this file)
 
@@ -60,6 +65,7 @@ Create a comprehensive instruction file defining standards and best practices fo
 
 **Decision**: Mandated BEM (Block Element Modifier) methodology for CSS class naming
 **Rationale**:
+
 - Provides clear component structure (`.block__element--modifier`)
 - Prevents naming conflicts in larger codebases
 - Improves readability and maintainability
@@ -70,6 +76,7 @@ Create a comprehensive instruction file defining standards and best practices fo
 
 **Decision**: Required mobile-first approach using `min-width` media queries
 **Rationale**:
+
 - Aligns with modern web usage patterns (mobile-first)
 - Better performance (base styles for mobile, progressive enhancement)
 - Easier to maintain (adding features vs. removing them)
@@ -80,6 +87,7 @@ Create a comprehensive instruction file defining standards and best practices fo
 
 **Decision**: Mandated IIFE module pattern for code organization
 **Rationale**:
+
 - No framework dependency requirement (vanilla JS)
 - Provides encapsulation without build tools
 - Clear public/private API separation
@@ -91,6 +99,7 @@ Create a comprehensive instruction file defining standards and best practices fo
 
 **Decision**: Required centralized state management with observer pattern
 **Rationale**:
+
 - Single source of truth for application state
 - Predictable state updates
 - Easier debugging and testing
@@ -102,6 +111,7 @@ Create a comprehensive instruction file defining standards and best practices fo
 
 **Decision**: Defined concrete performance targets (500KB total, 1.5s FCP, 3s TTI)
 **Rationale**:
+
 - Measurable success criteria from Web Calculator PRD
 - Ensures fast, responsive user experience
 - Prevents performance regression
@@ -112,6 +122,7 @@ Create a comprehensive instruction file defining standards and best practices fo
 
 **Decision**: Mandated WCAG 2.1 Level AA accessibility standards
 **Rationale**:
+
 - Legal compliance in many jurisdictions
 - Ethical responsibility to all users
 - Better user experience for everyone
@@ -121,11 +132,11 @@ Create a comprehensive instruction file defining standards and best practices fo
 
 ## Artifacts Produced
 
-| Artifact | Type | Purpose |
-|----------|------|---------|
-| `.github/instructions/web-technologies.instructions.md` | Instruction File | Canonical standards for HTML5, CSS3, and Vanilla JavaScript development |
-| `ai-logs/2026/02/12/web-tech-instructions-20260212/conversation.md` | AI Log | Full conversation transcript for provenance |
-| `ai-logs/2026/02/12/web-tech-instructions-20260212/summary.md` | Summary | High-level session overview and resumability context |
+| Artifact                                                            | Type             | Purpose                                                                 |
+| ------------------------------------------------------------------- | ---------------- | ----------------------------------------------------------------------- |
+| `.github/instructions/web-technologies.instructions.md`             | Instruction File | Canonical standards for HTML5, CSS3, and Vanilla JavaScript development |
+| `ai-logs/2026/02/12/web-tech-instructions-20260212/conversation.md` | AI Log           | Full conversation transcript for provenance                             |
+| `ai-logs/2026/02/12/web-tech-instructions-20260212/summary.md`      | Summary          | High-level session overview and resumability context                    |
 
 ## Lessons Learned
 
