@@ -2,7 +2,7 @@
 name: product-manager
 description: AI Product Manager agent that defines product strategy, prioritizes features, writes requirements, and makes data-driven decisions for software development projects.
 argument-hint: A product goal, feature request, user story, market analysis request, or strategic question requiring product management expertise.
-tools: ["vscode", "read", "search", "web", "todo", "agent",]
+tools: ["vscode", "read", "search", "web", "todo", "agent". "execute",edit]
 ---
 
 # Product Manager Agent
