@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A modern web-based calculator with responsive design and accessibility features">
+    <title>Web Calculator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="calculator-container">
+        <div class="calculator" role="application" aria-label="Calculator">
+            <!-- Display Area -->
+            <div class="calculator__display" id="display" role="status" aria-live="polite" aria-atomic="true">
+                <span class="display__value" id="displayValue">0</span>
+            </div>
+
+            <!-- Button Grid -->
+            <div class="calculator__buttons">
+                <!-- Number Buttons (0-9) -->
+                <button class="btn btn--number" data-digit="7" aria-label="Seven">7</button>
+                <button class="btn btn--number" data-digit="8" aria-label="Eight">8</button>
+                <button class="btn btn--number" data-digit="9" aria-label="Nine">9</button>
+                
+                <button class="btn btn--number" data-digit="4" aria-label="Four">4</button>
+                <button class="btn btn--number" data-digit="5" aria-label="Five">5</button>
+                <button class="btn btn--number" data-digit="6" aria-label="Six">6</button>
+                
+                <button class="btn btn--number" data-digit="1" aria-label="One">1</button>
+                <button class="btn btn--number" data-digit="2" aria-label="Two">2</button>
+                <button class="btn btn--number" data-digit="3" aria-label="Three">3</button>
+                
+                <button class="btn btn--number btn--zero" data-digit="0" aria-label="Zero">0</button>
+            </div>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
