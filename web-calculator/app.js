@@ -1,40 +1,51 @@
 /*
-AI-Generated: true
-Model: anthropic/claude-3.5-sonnet@2024-10-22
-Operator: User
-Chat ID: vs-01-implementation-20260213
-Prompt: Create JavaScript state management, event listeners for number buttons, inputDigit function with leading zero logic, and updateDisplay function
-Started: 2026-02-13T00:16:00Z
-Ended: 2026-02-13T00:20:00Z
-Task Duration: 00:04:00
-AI Log: ai-logs/2026/02/13/vs-01-implementation-20260213/conversation.md
-Source: johnmillerATcodemag-com
-*/
-
-/**
- * Web Calculator - VS-01: Display & Number Input
- * 
- * This module implements the foundational calculator functionality:
- * - Display component that shows current value
- * - Number input (digits 0-9)
- * - Leading zero replacement logic
+ * Web Calculator - VS-01 Display & Input, VS-03 Operation, VS-04 Equals & PEMDAS
+ *
+ * State: currentValue (display/current operand), expressionTokens (for PEMDAS),
+ * previousValue, operation, awaitingOperand, displayError / displayErrorMessage.
+ * currentInput is kept in sync with currentValue for backward compatibility with VS-01 tests.
+ *
+ * AI-Generated: true
+ * Model: anthropic/claude-3.5-sonnet@2024-10-22
+ * Operator: User
+ * Chat ID: vs-04-implementation-20260213
+ * Prompt: Implement VS-04 (Calculate Result with equals, PEMDAS, precision, tests)
+ * Started: 2026-02-13T00:00:00Z
+ * Ended: 2026-02-13T00:00:00Z
+ * Task Duration: 00:00:00
+ * AI Log: ai-logs/2026/02/13/vs-04-implementation-20260213/conversation.md
+ * Source: Cursor
  */
 
 // ===================================
 // State Management
 // ===================================
 
-/**
- * Calculator state object
- * @type {Object}
- */
+/** @typedef {{ type: 'number', value: string }} NumberToken */
+/** @typedef {{ type: 'operator', value: string }} OperatorToken */
+/** @typedef {NumberToken | OperatorToken} ExpressionToken */
+
 const calculatorState = {
-    currentInput: '0',      // Current display value
-    displayError: false     // Error state flag
+  /** Current display value / operand being entered (alias: currentInput for tests) */
+  currentValue: "0",
+  /** @type {string} Kept in sync with currentValue for VS-01 test compatibility */
+  currentInput: "0",
+  /** First operand when using single-op model (legacy) */
+  previousValue: "",
+  /** Last selected operation: "+", "-", "*", "/" */
+  operation: "",
+  /** True after operator or equals; next digit starts a new number */
+  awaitingOperand: false,
+  /** Tokens for multi-op PEMDAS: [{ type, value }, ...] */
+  expressionTokens: [],
+  /** When true, display shows error message */
+  displayError: false,
+  /** Error message to show (e.g. "Cannot divide by zero") */
+  displayErrorMessage: ""
 };
 
 // ===================================
-// DOM Elements (initialized on DOMContentLoaded)
+// DOM Elements
 // ===================================
 
 let displayElement = null;
@@ -42,65 +53,172 @@ let numberButtons = null;
 let backspaceButton = null;
 
 // ===================================
-// Core Functions
+// Display
+// ===================================
+
+function updateDisplay() {
+  if (!displayElement) return;
+  if (calculatorState.displayError && calculatorState.displayErrorMessage) {
+    displayElement.textContent = calculatorState.displayErrorMessage;
+    return;
+  }
+  if (calculatorState.displayError) {
+    displayElement.textContent = "Error";
+    return;
+  }
+  const displayValue = calculatorState.currentValue || "0";
+  displayElement.textContent = displayValue;
+}
+
+// ===================================
+// Input: digits and decimal
 // ===================================
 
 /**
- * Updates the display with the current state value
- * Handles error states and ensures proper formatting
- */
-function updateDisplay() {
-    if (calculatorState.displayError) {
-        displayElement.textContent = 'Error';
-        return;
-    }
-    
-    // Display "0" if currentInput is empty
-    const displayValue = calculatorState.currentInput || '0';
-    displayElement.textContent = displayValue;
-}
-
-/**
- * Appends a digit to the current input
- * Handles leading zero replacement logic
- * 
- * @param {string} digit - The digit to append (0-9)
+ * Appends a digit to the current operand. Handles leading zero and awaitingOperand.
+ *
+ * @param {string} digit - Single character "0"-"9"
  */
 function inputDigit(digit) {
-    // Reset error state if present
-    if (calculatorState.displayError) {
-        calculatorState.displayError = false;
-        calculatorState.currentInput = '';
-    }
-    
-    // Handle leading zero replacement
-    // If current input is "0" and user inputs another digit, replace the zero
-    if (calculatorState.currentInput === '0' && digit !== '0') {
-        calculatorState.currentInput = digit;
-    } 
-    // If current input is "0" and user inputs "0", keep it as "0"
-    else if (calculatorState.currentInput === '0' && digit === '0') {
-        // Do nothing, keep as "0"
-        return;
-    }
-    // Otherwise, append the digit
-    else {
-        calculatorState.currentInput += digit;
-    }
-    
+  if (calculatorState.displayError) {
+    calculatorState.displayError = false;
+    calculatorState.displayErrorMessage = "";
+    calculatorState.currentValue = digit === "0" ? "0" : digit;
+    calculatorState.currentInput = calculatorState.currentValue;
+    calculatorState.awaitingOperand = false;
+    calculatorState.expressionTokens = [];
+    calculatorState.previousValue = "";
+    calculatorState.operation = "";
     updateDisplay();
+    return;
+  }
+
+  // Sync from currentInput when set by tests or external code
+  if (calculatorState.currentInput !== calculatorState.currentValue) {
+    calculatorState.currentValue = calculatorState.currentInput;
+  }
+  const cur = calculatorState.currentValue;
+  if (calculatorState.awaitingOperand) {
+    calculatorState.currentValue = digit === "0" ? "0" : digit;
+    calculatorState.awaitingOperand = false;
+  } else if (cur === "0" && digit !== "0") {
+    calculatorState.currentValue = digit;
+  } else if (cur === "0" && digit === "0") {
+    return;
+  } else {
+    calculatorState.currentValue = cur + digit;
+  }
+  calculatorState.currentInput = calculatorState.currentValue;
+  updateDisplay();
 }
 
 /**
- * Handles number button click events
- * 
- * @param {Event} event - The click event
+ * Appends a decimal point if the current number does not already contain one.
  */
-function handleNumberClick(event) {
-    const digit = event.target.dataset.digit;
-    if (digit !== undefined) {
-        inputDigit(digit);
+function inputDecimal() {
+  if (calculatorState.displayError) {
+    calculatorState.displayError = false;
+    calculatorState.displayErrorMessage = "";
+    calculatorState.currentValue = "0.";
+    calculatorState.currentInput = "0.";
+    calculatorState.awaitingOperand = false;
+    calculatorState.expressionTokens = [];
+    calculatorState.previousValue = "";
+    calculatorState.operation = "";
+    updateDisplay();
+    return;
+  }
+  const cur = calculatorState.currentValue;
+  if (calculatorState.awaitingOperand) {
+    calculatorState.currentValue = "0.";
+    calculatorState.awaitingOperand = false;
+  } else if (cur.indexOf(".") >= 0) {
+    return;
+  } else {
+    calculatorState.currentValue = cur + ".";
+  }
+  calculatorState.currentInput = calculatorState.currentValue;
+  updateDisplay();
+}
+
+// ===================================
+// Operator selection (append to expression tokens)
+// ===================================
+
+/** Maps display symbols to internal operation symbols */
+const OPERATOR_MAP = { "+": "+", "−": "-", "×": "*", "÷": "/" };
+
+/**
+ * Handles operator button press: appends current number and operator to expression tokens.
+ *
+ * @param {string} displayOp - Display symbol: "+", "−", "×", "÷"
+ */
+function selectOperator(displayOp) {
+  if (calculatorState.displayError) return;
+  const op = OPERATOR_MAP[displayOp] ?? displayOp;
+  const value = calculatorState.currentValue || "0";
+  calculatorState.expressionTokens.push({ type: "number", value });
+  calculatorState.expressionTokens.push({ type: "operator", value: displayOp });
+  calculatorState.previousValue = value;
+  calculatorState.operation = op;
+  calculatorState.currentValue = "0";
+  calculatorState.currentInput = "0";
+  calculatorState.awaitingOperand = true;
+  updateDisplay();
+}
+
+// ===================================
+// Equals: evaluate expression with PEMDAS
+// ===================================
+
+function handleEquals() {
+  if (calculatorState.displayError) return;
+
+  const currentVal = calculatorState.currentValue || "0";
+  const tokens = calculatorState.expressionTokens.slice();
+  tokens.push({ type: "number", value: currentVal });
+
+  if (tokens.length === 1) {
+    calculatorState.currentValue = tokens[0].value;
+    calculatorState.currentInput = calculatorState.currentValue;
+    calculatorState.expressionTokens = [];
+    calculatorState.previousValue = "";
+    calculatorState.operation = "";
+    calculatorState.awaitingOperand = true;
+    updateDisplay();
+    return;
+  }
+
+  let result;
+  if (typeof calculator !== "undefined" && calculator.evaluateExpression) {
+    result = calculator.evaluateExpression(tokens);
+  } else if (typeof require === "function") {
+    try {
+      const calc = require("./calculator.js");
+      result = calc.evaluateExpression(tokens);
+    } catch (e) {
+      result = { error: true, message: "Invalid input" };
     }
+  } else {
+    result = { error: true, message: "Invalid input" };
+  }
+
+  if (result.error) {
+    calculatorState.displayError = true;
+    calculatorState.displayErrorMessage = result.message || "Error";
+    updateDisplay();
+    return;
+  }
+
+  calculatorState.currentValue = result.result;
+  calculatorState.currentInput = result.result;
+  calculatorState.expressionTokens = [];
+  calculatorState.previousValue = "";
+  calculatorState.operation = "";
+  calculatorState.awaitingOperand = true;
+  calculatorState.displayError = false;
+  calculatorState.displayErrorMessage = "";
+  updateDisplay();
 }
 
 /**
@@ -108,116 +226,144 @@ function handleNumberClick(event) {
  * Handles edge cases like single digit, empty input, and error states
  */
 function deleteLastDigit() {
-    // Reset error state if present
-    if (calculatorState.displayError) {
-        calculatorState.displayError = false;
-        calculatorState.currentInput = '0';
-        updateDisplay();
-        return;
-    }
-    
-    // If current input has only one character (or just "0"), set to "0"
-    if (calculatorState.currentInput.length === 1) {
-        calculatorState.currentInput = '0';
-    }
-    // If current input is just a negative sign "-", set to "0"
-    else if (calculatorState.currentInput === '-') {
-        calculatorState.currentInput = '0';
-    }
-    // Otherwise, remove the last character
-    else {
-        calculatorState.currentInput = calculatorState.currentInput.slice(0, -1);
-        
-        // If result is empty or just a negative sign, set to "0"
-        if (calculatorState.currentInput === '' || calculatorState.currentInput === '-') {
-            calculatorState.currentInput = '0';
-        }
-    }
-    
+  // Reset error state if present
+  if (calculatorState.displayError) {
+    calculatorState.displayError = false;
+    calculatorState.displayErrorMessage = "";
+    calculatorState.currentValue = "0";
+    calculatorState.currentInput = "0";
+    calculatorState.awaitingOperand = false;
     updateDisplay();
-}
-
-/**
- * Handles keyboard input events
- * 
- * @param {KeyboardEvent} event - The keyboard event
- */
-function handleKeyboardInput(event) {
-    // Handle number keys (0-9)
-    if (event.key >= '0' && event.key <= '9') {
-        inputDigit(event.key);
-        event.preventDefault();
+    return;
+  }
+  
+  const cur = calculatorState.currentValue;
+  // If current input has only one character (or just "0"), set to "0"
+  if (cur.length === 1) {
+    calculatorState.currentValue = "0";
+  }
+  // If current input is just a negative sign "-", set to "0"
+  else if (cur === "-") {
+    calculatorState.currentValue = "0";
+  }
+  // Otherwise, remove the last character
+  else {
+    calculatorState.currentValue = cur.slice(0, -1);
+    
+    // If result is empty or just a negative sign, set to "0"
+    if (calculatorState.currentValue === "" || calculatorState.currentValue === "-") {
+      calculatorState.currentValue = "0";
     }
-    // Handle Backspace key
-    else if (event.key === 'Backspace') {
-        deleteLastDigit();
-        event.preventDefault();
-    }
+  }
+  
+  calculatorState.currentInput = calculatorState.currentValue;
+  updateDisplay();
 }
 
 // ===================================
-// Event Listeners
+// Event Handlers
 // ===================================
 
-/**
- * Initialize event listeners for all buttons and keyboard
- */
-function initializeEventListeners() {
-    // Number button click handlers
-    numberButtons.forEach(button => {
-        button.addEventListener('click', handleNumberClick);
-    });
-    
-    // Backspace button click handler
-    if (backspaceButton) {
-        backspaceButton.addEventListener('click', deleteLastDigit);
+function handleNumberClick(event) {
+  const digit = event.target.dataset.digit;
+  if (digit !== undefined) inputDigit(digit);
+}
+
+function handleDecimalClick(event) {
+  if (event.target.dataset.decimal !== undefined) inputDecimal();
+}
+
+function handleOperatorClick(event) {
+  const op = event.target.dataset.operator;
+  if (op !== undefined) selectOperator(op);
+}
+
+function handleKeydown(event) {
+  // Handle Backspace key (VS-07 integration)
+  if (event.key === "Backspace") {
+    event.preventDefault();
+    deleteLastDigit();
+    return;
+  }
+  
+  if (event.key === "Enter") {
+    const tag = event.target && event.target.tagName ? event.target.tagName.toLowerCase() : "";
+    if (tag !== "input" && tag !== "textarea") {
+      event.preventDefault();
+      handleEquals();
     }
-    
-    // Keyboard input handler
-    document.addEventListener('keydown', handleKeyboardInput);
+    return;
+  }
+  const digit = event.key >= "0" && event.key <= "9" ? event.key : null;
+  if (digit !== null) {
+    event.preventDefault();
+    inputDigit(digit);
+    return;
+  }
+  const opMap = { "+": "+", "-": "−", "*": "×", "/": "÷" };
+  if (Object.prototype.hasOwnProperty.call(opMap, event.key)) {
+    event.preventDefault();
+    selectOperator(opMap[event.key]);
+  }
 }
 
 // ===================================
 // Initialization
 // ===================================
 
-/**
- * Initialize the calculator on page load
- */
-function initializeCalculator() {
-    // Initialize DOM element references
-    displayElement = document.getElementById('displayValue');
-    numberButtons = document.querySelectorAll('.btn--number');
-    backspaceButton = document.getElementById('backspaceBtn');
-    
-    // Set initial display
-    updateDisplay();
-    
-    // Attach event listeners
-    initializeEventListeners();
-    
-    console.log('Calculator initialized successfully');
+function initializeEventListeners() {
+  numberButtons.forEach((button) => button.addEventListener("click", handleNumberClick));
+  const decimalBtn = document.querySelector(".btn--decimal");
+  if (decimalBtn) decimalBtn.addEventListener("click", handleDecimalClick);
+  document.querySelectorAll(".btn--operator").forEach((btn) => {
+    btn.addEventListener("click", handleOperatorClick);
+  });
+  const equalsBtn = document.getElementById("equalsBtn");
+  if (equalsBtn) equalsBtn.addEventListener("click", handleEquals);
+  
+  // VS-07: Backspace button
+  backspaceButton = document.getElementById("backspaceBtn");
+  if (backspaceButton) backspaceButton.addEventListener("click", deleteLastDigit);
+  
+  document.addEventListener("keydown", handleKeydown);
 }
 
-// Initialize when DOM is fully loaded
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeCalculator);
-} else {
-    // DOM is already loaded
+function initializeCalculator() {
+  if (typeof document.querySelector !== "function" || typeof document.getElementById !== "function") {
+    return;
+  }
+  displayElement = document.getElementById("displayValue");
+  numberButtons = document.querySelectorAll(".btn--number");
+  if (!displayElement) return;
+  updateDisplay();
+  initializeEventListeners();
+}
+
+function shouldRunInit() {
+  return typeof window !== "undefined" && typeof document !== "undefined" && document.readyState !== undefined;
+}
+
+if (shouldRunInit()) {
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initializeCalculator);
+  } else {
     initializeCalculator();
+  }
 }
 
 // ===================================
 // Exports (for testing)
 // ===================================
 
-// Export functions for testing purposes
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        calculatorState,
-        inputDigit,
-        updateDisplay,
-        deleteLastDigit,
-        handleKeyboardInput
-    };
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = {
+    calculatorState,
+    inputDigit,
+    inputDecimal,
+    updateDisplay,
+    selectOperator,
+    handleEquals,
+    deleteLastDigit,
+    OPERATOR_MAP
+  };
 }
