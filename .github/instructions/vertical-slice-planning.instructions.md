@@ -16,6 +16,13 @@ task_durations:
     duration: "00:12:00"
   - task: "review and refinement"
     duration: "00:03:00"
+task_durations:
+  - task: "Initial Draft"
+    duration: "00:15:00"
+  - task: "Template Creation"
+    duration: "00:10:00"
+  - task: "Review and Refine"
+    duration: "00:05:00"
 total_duration: "00:30:00"
 ai_log: "ai-logs/2026/02/12/vertical-slice-planning-instr-20260212/conversation.md"
 source: "johnmillerATcodemag-com"
@@ -55,6 +62,7 @@ This instruction file guides AI assistants and developers through the planning a
 - [Dependency Analysis](#dependency-analysis)
 - [Implementation Sequencing](#implementation-sequencing)
 - [Slice Specification Template](#slice-specification-template)
+- [Test Automation Requirements](#test-automation-requirements)
 - [Validation Criteria](#validation-criteria)
 - [Common Planning Patterns](#common-planning-patterns)
 - [Anti-Patterns to Avoid](#anti-patterns-to-avoid)
@@ -380,10 +388,10 @@ Each slice should do one thing and do it well.
 
 ```
 ❌ Bad: UserManagementCommand
-  - Registers users
-  - Updates profiles
-  - Changes passwords
-  - Deletes accounts
+  // Handles registration, profile updates, password changes, and account deletion
+  // Violates SRP by doing too many things
+  public class UserManagementHandler
+  { ... }
 
 ✅ Good: Four separate slices
   - RegisterUserCommand
@@ -397,13 +405,12 @@ Each slice should contain all layers needed for its capability.
 
 ```
 ✅ Complete Slice: RegisterUserCommand
-  - API Endpoint (entry point)
-  - Command object (request)
-  - Validator (input validation)
+  - API Endpoint (controller action)
+  - Command/Query (request object)
   - Handler (business logic)
+  - Validator (input validation)
   - Repository (data access)
-  - Domain model (entity)
-  - Result DTO (response)
+  - DTOs (data transfer objects)
   - Tests (verification)
 ```
 
@@ -413,11 +420,11 @@ Slices should not directly depend on other slices.
 ```
 ❌ Bad:
 Features/UserManagement/RegisterUser/
-  → imports Features/EmailService/SendEmail/
+  → calls Features/UserProfile/CreateProfile/Handler.cs
 
 ✅ Good:
 Features/UserManagement/RegisterUser/
-  → imports Common/Interfaces/IEmailService
+  → calls Common/Interfaces/IUserProfileRepository.cs
   → raises domain event: UserRegistered
 ```
 
@@ -619,11 +626,11 @@ Extract common dependencies into shared interfaces:
 ```csharp
 // ❌ Direct dependency
 Features/Orders/CreateOrder/Handler.cs
-  → new UserRepository()
+  → _userRepository.GetById(userId) // Concrete dependency
 
 // ✅ Shared interface
 Common/Interfaces/IUserProvider.cs
-  → GetUserById(userId)
+  → GetUserById(Guid userId)
 
 Features/Orders/CreateOrder/Handler.cs
   → _userProvider.GetUserById(userId)
@@ -649,11 +656,11 @@ Isolate external system dependencies:
 ```csharp
 // ❌ Direct third-party dependency
 Features/Orders/CreateOrder/Handler.cs
-  → new StripePaymentGateway()
+  → Stripe.Charge.Create(...)
 
 // ✅ Anti-corruption layer
 Common/Adapters/PaymentGatewayAdapter.cs
-  → implements IPaymentGateway
+  → _stripeClient.Charge(...)
 
 Features/Orders/CreateOrder/Handler.cs
   → _paymentGateway.ProcessPayment()
@@ -692,11 +699,13 @@ Step 5: Repeat until all slices implemented
 ```
 Iteration 1 (No dependencies):
   ✓ CreateProductCommand
+  ✓ GetProductByIdQuery
   ✓ ListCategoriesQuery
 
 Iteration 2 (Depends on Iteration 1):
-  ✓ UpdateProductCommand (depends on CreateProductCommand)
-  ✓ GetProductDetailQuery (depends on CreateProductCommand)
+  ✓ UpdateProductCommand (depends on GetProductByIdQuery)
+  ✓ DeleteProductCommand (depends on GetProductByIdQuery)
+  ✓ ListProductsByCategoryQuery (depends on ListCategoriesQuery)
 
 Iteration 3 (Depends on Iteration 2):
   ✓ DeleteProductCommand (depends on UpdateProductCommand)
@@ -739,15 +748,17 @@ Step 4: Implement medium and low-risk slices
 
 ```
 Phase 1 (High Risk - Week 1):
-  → ProcessPaymentCommand (external payment gateway)
-  → ValidateInventoryQuery (complex business rules)
+  → ProcessPaymentCommand (integrates with new payment gateway)
+  → ComplexSearchQuery (uses new search technology)
+  → RealtimeUpdateService (uses WebSockets for first time)
 
 Phase 2 (Medium Risk - Week 2):
-  → CreateOrderCommand (orchestration logic)
-  → GetOrderStatusQuery (caching complexity)
+  → CreateOrderCommand (complex business logic)
+  → GenerateInvoiceCommand (PDF generation)
+  → UserPermissionsUpdateCommand (security-sensitive)
 
 Phase 3 (Low Risk - Week 3):
-  → ListOrdersQuery (standard CRUD)
+  → GetUserProfileQuery (simple read)
   → UpdateOrderNotesCommand (simple update)
 ```
 
@@ -768,17 +779,15 @@ Phase 3 (Low Risk - Week 3):
 
 1. [Slice Name] - [Brief description]
    - Priority: P0
-   - Business Value: High
+   - Effort: 3 days
+   - Risk: Low
    - Dependencies: None
-   - Estimated Effort: [Hours/Days]
-   - Risk: [Low/Medium/High]
 
 2. [Slice Name] - [Brief description]
    - Priority: P0
-   - Business Value: High
-   - Dependencies: None
-   - Estimated Effort: [Hours/Days]
-   - Risk: [Low/Medium/High]
+   - Effort: 5 days
+   - Risk: Medium
+   - Dependencies: [Slice 1]
 
 **Deliverables**:
 
@@ -809,9 +818,9 @@ Phase 3 (Low Risk - Week 3):
 **High Risks**:
 
 1. [Risk Description]
-   - Impact: [High/Medium/Low]
+   - Impact: High
+   - Probability: Medium
    - Mitigation: [Strategy]
-   - Contingency: [Fallback plan]
 
 **Medium Risks**:
 [Same format]
@@ -862,22 +871,22 @@ So that [benefit]
 **Request Model**:
 
 ```csharp
-public class [SliceName]Command
+public class [SliceName]Command : IRequest<[SliceName]Result>
 {
-    public Type Property1 { get; set; }
-    public Type Property2 { get; set; }
+    public string UserName { get; set; }
+    public string Email { get; set; }
+    public string Password { get; set; }
 }
 ```
-````
 
 **Response Model**:
 
 ```csharp
 public class [SliceName]Result
 {
-    public bool Success { get; set; }
-    public Type Data { get; set; }
-    public List<string> Errors { get; set; }
+    public Guid UserId { get; set; }
+    public bool IsSuccessful { get; set; }
+    public string Message { get; set; }
 }
 ```
 
@@ -1091,7 +1100,6 @@ public class [SliceName]Result
 
 ✓ Pass: Easy to explain what the slice does
 ✗ Fail: Overlapping responsibilities with other slices
-
 ````
 
 ## Common Planning Patterns
@@ -1106,20 +1114,18 @@ public class [SliceName]Result
 Entity: Product
 
 Queries (Reads):
+
 1. ListProductsQuery - Paginated list with filters
 2. GetProductByIdQuery - Single product details
 3. SearchProductsQuery - Full-text search
 
-Commands (Writes):
-4. CreateProductCommand - Add new product
-5. UpdateProductCommand - Modify existing product
-6. DeleteProductCommand - Soft delete product
+Commands (Writes): 4. CreateProductCommand - Add new product 5. UpdateProductCommand - Modify existing product 6. DeleteProductCommand - Soft delete product
 
 Implementation Order:
 Phase 1: CreateProductCommand, GetProductByIdQuery
 Phase 2: ListProductsQuery, UpdateProductCommand
 Phase 3: SearchProductsQuery, DeleteProductCommand
-````
+```
 
 ### Pattern 2: Multi-Stage Workflow Planning
 
@@ -1876,3 +1882,1328 @@ This instruction file provides comprehensive guidance for planning vertical slic
 **Next Review**: 2026-05-12
 **Owner**: Architecture Team
 **Status**: Active
+
+```
+
+## Test Automation Requirements
+
+A comprehensive test automation strategy is critical for validating vertical slices and ensuring they meet quality standards. Each slice must be accompanied by a suite of automated tests covering different levels of the testing pyramid.
+
+### Guiding Principles
+
+- **Test in Isolation**: Slices should be testable with minimal dependencies on other slices.
+- **Automate Everything**: All tests—unit, integration, and E2E—should be fully automated and run in CI.
+- **Shift-Left Testing**: Write tests as you write code, not after. Use TDD/BDD where appropriate.
+- **Focus on Behavior**: Tests should validate the business logic and user-facing behavior, not implementation details.
+
+### Unit Testing Requirements
+
+**Scope**: Test individual components of a slice in isolation (e.g., handlers, validators, mappers).
+
+**Requirements**:
+
+- **Handlers**:
+  - [ ] Verify correct business logic execution for valid inputs.
+  - [ ] Verify correct handling of business rule violations (e.g., returning a failure result).
+  - [ ] Verify all external dependencies (services, repositories) are called with expected parameters.
+  - [ ] Verify domain events are published correctly.
+  - [ ] Mock all external dependencies (database, APIs, message bus).
+- **Validators**:
+  - [ ] Test all validation rules for both valid and invalid data.
+  - [ ] Ensure appropriate error messages are generated for each validation failure.
+- **Code Coverage**: Aim for >90% code coverage for slice logic (handlers and validators).
+
+### Integration Testing Requirements
+
+**Scope**: Test a slice's interaction with its direct, out-of-process dependencies, such as databases, caches, and message brokers.
+
+**Requirements**:
+
+- **Database Integration**:
+  - [ ] Verify data is correctly persisted to the database for command slices.
+  - [ ] Verify data is correctly retrieved and mapped for query slices.
+  - [ ] Test transactional behavior, including rollbacks on failure.
+  - [ ] Use a real database instance (e.g., in a Docker container) for tests, not an in-memory fake.
+- **Message Bus Integration**:
+  - [ ] Verify events are correctly published to the bus.
+  - [ ] For event handlers, verify the handler is triggered by a message and processes it correctly.
+- **API Integration**:
+  - [ ] Verify the slice correctly interacts with external APIs it depends on. Use tools like WireMock to simulate external API behavior.
+
+### End-to-End (E2E) Testing Requirements
+
+**Scope**: Test the full vertical slice from the API endpoint down to the database and back, simulating a real user request.
+
+**Requirements**:
+
+- [ ] Test the "happy path" for each slice to ensure it works as expected.
+- [ ] Test key failure scenarios (e.g., invalid input, authorization failures, downstream service failures).
+- [ ] Validate the HTTP response (status code, headers, and body) is correct.
+- [ ] Validate side effects, such as database state changes or events published.
+- [ ] E2E tests should be focused and minimal, as they are more brittle and slower than unit or integration tests.
+
+### Performance Testing Requirements
+
+**Scope**: Validate that the slice meets its non-functional requirements for response time and resource usage under load.
+
+**Requirements**:
+
+- [ ] Establish baseline performance metrics for each slice.
+- [ ] Create load tests that simulate expected production traffic.
+- [ ] Identify and resolve performance bottlenecks (e.g., slow database queries, inefficient logic).
+- [ ] Performance tests should be run in a production-like environment.
+
+### Security Testing Requirements
+
+**Scope**: Identify and mitigate security vulnerabilities within the slice.
+
+**Requirements**:
+
+- **Authentication & Authorization**:
+  - [ ] Verify that unauthenticated requests are rejected.
+  - [ ] Verify that users with insufficient permissions are denied access.
+  - [ ] Test for privilege escalation vulnerabilities.
+- **Input Validation**:
+  - [ ] Test for common vulnerabilities like SQL Injection, Cross-Site Scripting (XSS), and insecure deserialization.
+  - [ ] Fuzz test API endpoints with unexpected and malicious inputs.
+- **Data Protection**:
+  - [ ] Ensure sensitive data is not leaked in responses or logs.
+
+## Validation Criteria
+
+### Slice Independence Validation
+
+**Test 1: No Feature-to-Feature References**
+
+```
+
+✓ Pass: No imports from Features/[OtherFeature]
+✗ Fail: Direct references to other feature folders
+
+```
+
+**Test 2: Self-Contained Vertical Stack**
+
+```
+
+✓ Pass: Slice contains all layers (API → Handler → Repository → Tests)
+✗ Fail: Missing layers, requires other slices to function
+
+```
+
+**Test 3: Can Be Deployed Independently**
+
+```
+
+✓ Pass: Slice can be feature-flagged on/off
+✗ Fail: Enabling slice breaks other slices
+
+```
+
+### Slice Size Validation
+
+**Test 1: Single Responsibility**
+
+```
+
+✓ Pass: Slice does one thing
+✗ Fail: Slice handles multiple unrelated user actions
+
+```
+
+**Test 2: Reasonable Complexity**
+
+```
+
+✓ Pass: Handler is 30-100 lines, 2-5 dependencies
+✗ Fail: Handler exceeds 150 lines or has 7+ dependencies
+
+```
+
+**Test 3: Implementable in 1-2 Days**
+
+```
+
+✓ Pass: Single developer can complete in reasonable timeframe
+✗ Fail: Requires multiple developers or weeks of work
+
+```
+
+### Slice Cohesion Validation
+
+**Test 1: Related Logic Together**
+
+```
+
+✓ Pass: All logic for this user action is in the slice
+✗ Fail: Business logic scattered across multiple slices or layers
+
+```
+
+**Test 2: No Shared State**
+
+```
+
+✓ Pass: Slice maintains no state between requests
+✗ Fail: Slice depends on stateful singletons or globals
+
+```
+
+**Test 3: Clear Boundaries**
+
+```
+
+✓ Pass: Easy to explain what the slice does
+✗ Fail: Overlapping responsibilities with other slices
+
+````
+
+## Common Planning Patterns
+
+### Pattern 1: CRUD Feature Planning
+
+**Scenario**: Implementing standard CRUD operations for an entity
+
+**Planning Approach**:
+
+```markdown
+Entity: Product
+
+Queries (Reads):
+
+1. ListProductsQuery - Paginated list with filters
+2. GetProductByIdQuery - Single product details
+3. SearchProductsQuery - Full-text search
+
+Commands (Writes): 4. CreateProductCommand - Add new product 5. UpdateProductCommand - Modify existing product 6. DeleteProductCommand - Soft delete product
+
+Implementation Order:
+Phase 1: CreateProductCommand, GetProductByIdQuery
+Phase 2: ListProductsQuery, UpdateProductCommand
+Phase 3: SearchProductsQuery, DeleteProductCommand
+````
+
+### Pattern 2: Multi-Stage Workflow Planning
+
+**Scenario**: Implementing a workflow with distinct stages
+
+**Planning Approach**:
+
+```markdown
+Workflow: Order Processing
+
+Stages:
+
+1. CreateOrderCommand - Initialize order
+2. ValidateInventoryCommand - Check product availability
+3. ProcessPaymentCommand - Charge customer
+4. ConfirmOrderCommand - Finalize order
+5. ShipOrderCommand - Begin fulfillment
+6. CompleteOrderCommand - Close order
+
+Queries: 7. GetOrderStatusQuery - Check current stage 8. GetOrderHistoryQuery - View stage transitions
+
+Implementation Order:
+Phase 1: CreateOrderCommand, GetOrderStatusQuery
+Phase 2: ProcessPaymentCommand, ConfirmOrderCommand
+Phase 3: ValidateInventoryCommand, ShipOrderCommand
+Phase 4: CompleteOrderCommand, GetOrderHistoryQuery
+```
+
+### Pattern 3: Event-Driven Feature Planning
+
+**Scenario**: Implementing features driven by domain events
+
+**Planning Approach**:
+
+```markdown
+Feature: User Lifecycle Management
+
+Commands (Event Publishers):
+
+1. RegisterUserCommand → raises UserRegisteredEvent
+2. VerifyEmailCommand → raises UserEmailVerifiedEvent
+3. ActivateUserCommand → raises UserActivatedEvent
+4. SuspendUserCommand → raises UserSuspendedEvent
+
+Event Handlers (Event Subscribers): 5. OnUserRegistered → Send welcome email 6. OnUserRegistered → Create default preferences 7. OnUserEmailVerified → Enable account features 8. OnUserActivated → Notify admin dashboard 9. OnUserSuspended → Revoke active sessions
+
+Implementation Order:
+Phase 1: RegisterUserCommand, OnUserRegistered (email)
+Phase 2: VerifyEmailCommand, OnUserEmailVerified
+Phase 3: ActivateUserCommand, OnUserActivated
+Phase 4: SuspendUserCommand, OnUserSuspended
+Phase 5: OnUserRegistered (preferences)
+```
+
+### Pattern 4: Report/Analytics Planning
+
+**Scenario**: Implementing reporting and analytics features
+
+**Planning Approach**:
+
+```markdown
+Feature: Sales Analytics
+
+Queries:
+
+1. GetSalesTotalsQuery - Aggregate totals by date range
+2. GetTopProductsQuery - Best-selling products
+3. GetSalesByRegionQuery - Geographic breakdown
+4. GetSalesTrendQuery - Time-series data
+5. GetCustomerSegmentationQuery - Customer categories
+6. ExportSalesReportQuery - Generate CSV/PDF
+
+Commands: 7. RecalculateSalesMetricsCommand - Rebuild aggregates
+
+Implementation Order:
+Phase 1: GetSalesTotalsQuery (most requested)
+Phase 2: GetTopProductsQuery, GetSalesByRegionQuery
+Phase 3: GetSalesTrendQuery, GetCustomerSegmentationQuery
+Phase 4: ExportSalesReportQuery
+Phase 5: RecalculateSalesMetricsCommand (maintenance)
+```
+
+### Pattern 5: Brownfield Migration Planning
+
+**Scenario**: Incrementally migrating layered architecture to vertical slices
+
+**Planning Approach**:
+
+```markdown
+Existing System: Layered monolith
+Target: Vertical slice architecture
+
+Migration Strategy:
+
+1. Identify high-change features (most volatile code)
+2. Extract to vertical slices (strangler fig pattern)
+3. Keep remaining code in existing structure
+4. Gradually migrate remaining features
+
+Phase 1: New Features (Pure Vertical Slices)
+
+- Implement all new features as vertical slices
+- No changes to existing code
+
+Phase 2: High-Change Features (Extract and Refactor)
+
+- UserRegistrationFeature (changes monthly)
+- ProductSearchFeature (changes weekly)
+- OrderCheckoutFeature (changes frequently)
+
+Phase 3: Medium-Change Features (Extract Carefully)
+
+- InvoiceGenerationFeature (changes quarterly)
+- ReportingFeature (changes occasionally)
+
+Phase 4: Low-Change Features (Leave Alone)
+
+- LegacyIntegrationsFeature (stable, rarely changes)
+- AdminPanelFeature (working well, low risk)
+
+Decision: Migrate high-change first, leave stable code alone
+```
+
+## Anti-Patterns to Avoid
+
+### Anti-Pattern 1: Horizontal Slicing
+
+**Problem**: Organizing by technical layer instead of feature
+
+```
+❌ Bad Structure (Horizontal):
+/Controllers/UserController.cs
+/Services/UserService.cs
+/Repositories/UserRepository.cs
+/Models/UserModel.cs
+
+✅ Good Structure (Vertical):
+/Features/UserRegistration/RegisterUserCommand.cs
+/Features/UserRegistration/RegisterUserHandler.cs
+/Features/UserProfile/GetUserProfileQuery.cs
+/Features/UserProfile/GetUserProfileHandler.cs
+```
+
+**Detection**: Ask "If I need to change user registration, how many folders do I touch?"
+
+- Horizontal: 4+ folders (Controllers, Services, Repositories, Models)
+- Vertical: 1 folder (Features/UserRegistration)
+
+### Anti-Pattern 2: Mega-Slices
+
+**Problem**: Slices that are too large and do too much
+
+```
+❌ Bad: UserManagementSlice
+- Handles registration, login, profile, password, preferences, admin
+- 800+ lines in handler
+- 15+ dependencies
+- Takes 2 weeks to implement
+
+✅ Good: Multiple focused slices
+- RegisterUserCommand (50 lines)
+- LoginUserCommand (60 lines)
+- UpdateUserProfileCommand (40 lines)
+- ChangePasswordCommand (55 lines)
+- Each: 2-4 dependencies, 4-8 hours to implement
+```
+
+**Detection**: If estimated effort exceeds 2 days, decompose further
+
+### Anti-Pattern 3: Nano-Slices
+
+**Problem**: Slices that are too small and provide no business value alone
+
+```
+❌ Bad: Excessive decomposition
+- ValidateEmailAddressCommand (pass-through to validator)
+- CheckUserExistsQuery (trivial database check)
+- FormatUserNameCommand (pure utility)
+
+✅ Good: Appropriately-sized slices
+- RegisterUserCommand (includes email validation)
+- GetUserProfileQuery (includes existence check)
+- UpdateUserProfileCommand (includes name formatting)
+```
+
+**Detection**: If slice has no business logic and is just a pass-through, combine it
+
+### Anti-Pattern 4: Feature-to-Feature Dependencies
+
+**Problem**: Slices directly importing other feature slices
+
+```
+❌ Bad:
+/Features/OrderCheckout/CheckoutHandler.cs
+  using Features.UserManagement;
+  using Features.Inventory;
+  using Features.Shipping;
+
+✅ Good:
+/Features/OrderCheckout/CheckoutHandler.cs
+  using Common.Interfaces;
+  private readonly IUserProvider _userProvider;
+  private readonly IInventoryService _inventoryService;
+  private readonly IShippingCalculator _shippingCalculator;
+```
+
+**Detection**: Grep for `using Features\\.` - Should return zero matches
+
+### Anti-Pattern 5: Anemic Slices
+
+**Problem**: Slices with no business logic, just CRUD operations
+
+```
+❌ Bad: Pure pass-through
+public class CreateProductHandler
+{
+    public async Task<Unit> Handle(CreateProductCommand cmd)
+    {
+        await _repository.AddAsync(cmd.ToEntity());
+        return Unit.Value;
+    }
+}
+
+✅ Good: Business logic present
+public class CreateProductHandler
+{
+    public async Task<Result<Guid>> Handle(CreateProductCommand cmd)
+    {
+        // Validation
+        if (await _repository.SKUExistsAsync(cmd.SKU))
+            return Result.Failure("SKU already exists");
+
+        // Business logic
+        var product = Product.Create(cmd.Name, cmd.SKU, cmd.Price);
+        product.SetCategory(cmd.CategoryId);
+        product.ApplyPricingRules(_pricingEngine);
+
+        // Persist
+        await _repository.AddAsync(product);
+
+        // Domain event
+        await _eventBus.Publish(new ProductCreatedEvent(product.Id));
+
+        return Result.Success(product.Id);
+    }
+}
+```
+
+**Detection**: If handler only calls repository methods with no logic, reconsider boundaries
+
+### Anti-Pattern 6: Planning Every Detail Upfront
+
+**Problem**: Over-planning before any implementation or feedback
+
+```
+❌ Bad: 6-week planning phase
+- Specify every slice in complete detail
+- Design every model, validator, DTO
+- Plan all error codes and messages
+- Create complete database schema
+- Result: Over-engineered, brittle plan
+
+✅ Good: Iterative planning
+- Identify high-level slices (1 day)
+- Specify Phase 1 slices in detail (1 day)
+- Implement Phase 1, learn (1-2 weeks)
+- Use learnings to specify Phase 2
+- Repeat in iterations
+```
+
+**Detection**: If planning phase exceeds implementation phase, you're over-planning
+
+### Anti-Pattern 7: Ignoring Existing Patterns
+
+**Problem**: Imposing vertical slices on a codebase that doesn't support it
+
+```
+❌ Bad: Force vertical slices into layered monolith
+- Existing code is tightly coupled
+- Shared database context everywhere
+- No dependency injection
+- Result: Awkward hybrid, technical debt increases
+
+✅ Good: Assess and decide
+- Is codebase amenable to vertical slices?
+- Do we have DI and interfaces?
+- Can we incrementally migrate?
+- If not, fix foundations first OR accept layered architecture
+```
+
+**Detection**: If vertical slices feel unnatural and awkward, validate the architecture first
+
+## Integration with Existing Systems
+
+### Assessment Checklist
+
+Before planning vertical slices for an existing system:
+
+- [ ] **Architecture Review**: Does the system support feature-centric organization?
+- [ ] **Dependency Injection**: Is DI available and used consistently?
+- [ ] **Coupling Assessment**: How tightly coupled is existing code?
+- [ ] **Database Strategy**: Can we avoid shared DbContext in features?
+- [ ] **Team Buy-In**: Is the team aligned on vertical slice adoption?
+- [ ] **Migration Path**: Can we migrate incrementally or need big-bang refactor?
+
+### Integration Strategies
+
+**Strategy 1: Strangler Fig (Recommended)**
+
+```markdown
+Approach: Gradually wrap and replace existing components
+
+Phase 1: Identify Boundaries
+
+- Map existing features and their components
+- Identify high-change vs. low-change areas
+
+Phase 2: New Features Only
+
+- All new features implemented as vertical slices
+- Existing features remain untouched
+
+Phase 3: Extract High-Change Features
+
+- Refactor frequently-modified code to vertical slices
+- Leave stable code in existing structure
+
+Phase 4: Gradual Migration
+
+- Over time, extract more features
+- Eventually most code is vertical slices
+
+Timeframe: 6-18 months for large systems
+Risk: Low (incremental, reversible)
+```
+
+**Strategy 2: Feature-by-Feature**
+
+```markdown
+Approach: Migrate one complete feature at a time
+
+Phase 1: Select Feature
+
+- Choose a well-bounded feature
+- Ideally with low external dependencies
+
+Phase 2: Extract to Vertical Slice
+
+- Move all layers into Features/[Feature] folder
+- Refactor to handler pattern
+- Add tests
+
+Phase 3: Validate
+
+- Ensure functionality unchanged
+- Performance acceptable
+- Team comfortable
+
+Phase 4: Repeat
+
+- Select next feature
+- Apply learnings
+
+Timeframe: 1-2 weeks per feature
+Risk: Medium (more invasive per feature)
+```
+
+**Strategy 3: Adapter Pattern**
+
+```markdown
+Approach: Create vertical slice facade over existing code
+
+Phase 1: Define Slice Interface
+
+- Create command/query objects
+- Define handlers without implementation
+
+Phase 2: Adapter Layer
+
+- Handlers call into existing services/repositories
+- Minimal refactoring of existing code
+
+Phase 3: Gradual Replacement
+
+- Over time, move logic from old services into handlers
+- Eventually remove old services
+
+Example:
+RegisterUserCommand → RegisterUserHandler
+↓ (adapter)
+UserService.Register() (existing)
+↓
+UserRepository.Add() (existing)
+
+Timeframe: Immediate (facade), then gradual (migration)
+Risk: Low (non-invasive initially)
+```
+
+### Brownfield Migration Plan Template
+
+```markdown
+## Vertical Slice Migration Plan: [System Name]
+
+### Current State Assessment
+
+**Architecture**: [Current pattern - layered, N-tier, etc.]
+**Primary Language**: [Language/Framework]
+**Codebase Size**: [Lines of code, file count]
+**Team Size**: [Developer count]
+**Change Frequency**: [Features per month]
+
+**Current Pain Points**:
+
+1. [Pain point 1]
+2. [Pain point 2]
+3. [Pain point 3]
+
+**Blockers to Vertical Slices**:
+
+- [ ] No dependency injection
+- [ ] Tightly coupled components
+- [ ] Shared mutable state
+- [ ] Database-per-feature not possible
+- [ ] Team resistance
+
+### Migration Strategy
+
+**Selected Approach**: [Strangler Fig / Feature-by-Feature / Adapter Pattern]
+
+**Rationale**: [Why this approach fits this system]
+
+### Phase 1: Preparation (Week 1-2)
+
+**Goals**:
+
+- Set up vertical slice infrastructure
+- Choose pilot feature
+- Create example/template slice
+
+**Tasks**:
+
+- [ ] Create /Features folder structure
+- [ ] Set up MediatR or similar pattern
+- [ ] Create slice templates/generators
+- [ ] Team training on vertical slices
+- [ ] Document migration guidelines
+
+### Phase 2: Pilot (Week 3-4)
+
+**Pilot Feature**: [Feature name]
+
+**Why This Feature**:
+
+- [Reason 1: e.g., well-bounded]
+- [Reason 2: e.g., low coupling]
+- [Reason 3: e.g., high change frequency]
+
+**Pilot Slices**:
+
+1. [Slice 1]
+2. [Slice 2]
+3. [Slice 3]
+
+**Success Criteria**:
+
+- [ ] Feature works identically
+- [ ] Tests pass
+- [ ] Performance unchanged
+- [ ] Team comfortable with approach
+
+### Phase 3: Expansion (Month 2-6)
+
+**Target Features** (in priority order):
+
+1. [Feature 1] - [Rationale]
+2. [Feature 2] - [Rationale]
+3. [Feature 3] - [Rationale]
+4. [Feature 4] - [Rationale]
+5. [Feature 5] - [Rationale]
+
+**Per Feature**:
+
+- Estimated: [Days/Weeks]
+- Dependencies: [Other features]
+- Risk: [Low/Medium/High]
+
+### Phase 4: Stabilization (Month 7-12)
+
+**Goals**:
+
+- Continue migrating medium-priority features
+- Leave low-change features in existing structure
+- Optimize and refactor as patterns emerge
+
+**Features to Leave Alone**:
+
+- [Feature 1] - [Reason: stable, working well]
+- [Feature 2] - [Reason: low change frequency]
+
+### Success Metrics
+
+**Technical Metrics**:
+
+- % of features in vertical slice structure: Target 60-80%
+- Average feature change touches N files: Target <5
+- Test coverage: Target maintain or improve
+- Build time: Target maintain or improve
+
+**Team Metrics**:
+
+- Time to implement new feature: Target -20%
+- Onboarding time for new developers: Target -30%
+- Cross-team dependencies: Target -40%
+- Developer satisfaction: Target +20%
+
+### Risk Mitigation
+
+**High Risks**:
+
+1. [Risk]: [Mitigation strategy]
+2. [Risk]: [Mitigation strategy]
+
+**Rollback Plan**:
+
+- [How to revert if migration fails]
+
+### Timeline
+
+| Phase         | Duration | Milestones             |
+| ------------- | -------- | ---------------------- |
+| Preparation   | 2 weeks  | Infrastructure ready   |
+| Pilot         | 2 weeks  | 1 feature migrated     |
+| Expansion     | 4 months | 5+ features migrated   |
+| Stabilization | 6 months | 60%+ features migrated |
+
+**Total Duration**: 12 months
+```
+
+## Planning Outputs
+
+### Output 1: Feature Slice Catalog
+
+```markdown
+## Feature Slice Catalog: [System/Feature Name]
+
+**Last Updated**: [Date]
+**Owner**: [Name]
+
+### Feature: [Feature Name 1]
+
+**Description**: [Brief description of business capability]
+
+**Slices**:
+
+| Slice Name | Type    | Priority | Status      | Est. Effort |
+| ---------- | ------- | -------- | ----------- | ----------- |
+| [Slice 1]  | Command | P0       | Not Started | 8h          |
+| [Slice 2]  | Query   | P0       | Not Started | 4h          |
+| [Slice 3]  | Command | P1       | Not Started | 6h          |
+
+**Dependencies**:
+
+- [Dependency 1]
+- [Dependency 2]
+
+**Total Effort**: [Hours/Days]
+**Target Completion**: [Date]
+
+### Feature: [Feature Name 2]
+
+[Same structure]
+```
+
+### Output 2: Implementation Matrix
+
+```markdown
+## Implementation Matrix
+
+| Slice                    | Feature         | Priority | Value | Effort | Risk | Dependencies        | Sprint   | Status      |
+| ------------------------ | --------------- | -------- | ----- | ------ | ---- | ------------------- | -------- | ----------- |
+| RegisterUserCommand      | User Management | P0       | High  | 8h     | Low  | None                | Sprint 1 | ✓ Done      |
+| GetUserProfileQuery      | User Management | P0       | High  | 4h     | Low  | RegisterUserCommand | Sprint 1 | ✓ Done      |
+| UpdateUserProfileCommand | User Management | P1       | Med   | 6h     | Low  | RegisterUserCommand | Sprint 2 | In Progress |
+| ChangePasswordCommand    | User Management | P1       | Med   | 6h     | Med  | RegisterUserCommand | Sprint 2 | Not Started |
+| DeleteUserAccountCommand | User Management | P2       | Low   | 8h     | High | All above           | Sprint 3 | Not Started |
+```
+
+### Output 3: Dependency Graph
+
+```mermaid
+graph TD
+    A[RegisterUserCommand] --> B[GetUserProfileQuery]
+    A --> C[UpdateUserProfileCommand]
+    A --> D[ChangePasswordCommand]
+    C --> E[DeleteUserAccountCommand]
+    D --> E
+    B --> E
+```
+
+### Output 4: Sprint Plan
+
+```markdown
+## Sprint Plan: [Feature Name]
+
+### Sprint 1 (2 weeks)
+
+**Goal**: Implement core user registration and profile retrieval
+
+**Slices**:
+
+1. RegisterUserCommand (8h)
+   - Assignee: [Developer]
+   - Dependencies: None
+   - Definition of Done: [Checklist]
+
+2. GetUserProfileQuery (4h)
+   - Assignee: [Developer]
+   - Dependencies: RegisterUserCommand
+   - Definition of Done: [Checklist]
+
+**Sprint Capacity**: 80 hours (2 devs × 40h)
+**Allocated**: 12 hours
+**Buffer**: 68 hours for other work
+
+**Risks**:
+
+- [Risk 1]: [Mitigation]
+
+**Sprint Deliverables**:
+
+- [ ] Users can register accounts
+- [ ] Users can view their profiles
+- [ ] Unit tests pass (80%+ coverage)
+- [ ] Integration tests pass
+- [ ] Deployed to test environment
+
+### Sprint 2 (2 weeks)
+
+[Same format]
+```
+# Showcasing Slices to Stakeholders
+
+**Instructions**: Insert this section into `vertical-slice-planning.instructions.md` after the "Planning Outputs" section and before the "Quality Checklist" section (approximately line 2726).
+
+---
+
+## Showcasing Slices to Stakeholders
+
+### Overview
+
+Effective demonstration of vertical slice implementations to stakeholders requires translating technical architecture into business value. This section provides strategies for presenting slice work in ways that resonate with different audiences while maintaining technical accuracy.
+
+**Key Audiences**:
+
+- **Business Stakeholders**: Focus on delivered value and user capabilities
+- **Product Managers**: Emphasize feature completeness and roadmap alignment
+- **Technical Leadership**: Highlight architecture benefits and maintainability
+- **End Users**: Demonstrate working functionality and user experience
+
+### Presentation Strategies
+
+#### Strategy 1: Value-First Demonstration
+
+**Approach**: Lead with business value and working functionality
+
+**Structure**:
+
+1. **Business Context** (1-2 minutes) - User problem, business capability, customer journey fit
+2. **Live Demonstration** (3-5 minutes) - End-to-end feature with realistic scenarios
+3. **Behind the Scenes** (2-3 minutes, optional) - Slice architecture and extensibility
+
+**Example Script**:
+
+> "Today I'm showing you the new user registration capability. This enables potential customers to create accounts within 60 seconds of landing on our site.
+>
+> [Demo the registration flow]
+>
+> This feature is built as two independent vertical slices - registration and profile viewing. Each contains everything needed: API endpoints, business logic, data access, tests. We can modify registration tomorrow without touching profile code.
+>
+> The benefit: faster feature delivery and lower risk of breaking existing functionality."
+
+#### Strategy 2: Feature Catalog Review
+
+**Approach**: Present complete feature landscape and implementation status
+
+**Materials Needed**: Feature Slice Catalog, visual roadmap/dependency graph, status dashboard
+
+**Presentation Flow**:
+
+1. **Feature Overview** (2 min) - Complete catalog, slice organization, status highlights
+2. **Progress Walkthrough** (5-7 min) - Implemented slices, key demos, backlog review
+3. **Value Discussion** (3-5 min) - Business outcomes, prioritization rationale, feedback gathering
+
+**Visual Aid Template**:
+
+```markdown
+## Feature Implementation Dashboard
+
+### User Management (70% Complete)
+
+| Slice                       | Status      | Business Value | Demo Ready |
+| --------------------------- | ----------- | -------------- | ---------- |
+| ✅ RegisterUserCommand      | Complete    | Critical       | Yes        |
+| ✅ GetUserProfileQuery      | Complete    | Critical       | Yes        |
+| 🔄 UpdateUserProfileCommand | In Progress | High           | Partial    |
+| ⏳ ChangePasswordCommand    | Planned     | Medium         | No         |
+| ⏳ DeleteUserAccountCommand | Planned     | Low            | No         |
+
+**Next Demo**: Sprint 3 (2 weeks) - Profile updates and password changes
+```
+
+#### Strategy 3: Before/After Comparison
+
+**Approach**: Demonstrate architectural improvements and benefits
+
+**Best For**: Technical leadership and engineering teams
+
+**Comparison Points**:
+
+| Aspect             | Before (Layered)                                   | After (Vertical Slices)             |
+| ------------------ | -------------------------------------------------- | ----------------------------------- |
+| Feature Changes    | Touch 5-8 files across layers                      | Touch 2-3 files in one folder       |
+| Test Organization  | Separate test projects by layer                    | Tests colocated with feature        |
+| Code Navigation    | Jump between Controllers → Services → Repositories | All code in Features/[Name]/ folder |
+| Merge Conflicts    | Frequent (shared controller files)                 | Rare (isolated feature folders)     |
+| Onboarding Time    | 2-3 weeks (learn all layers)                       | 3-5 days (learn one slice pattern)  |
+| Risk of Regression | High (shared services)                             | Low (isolated features)             |
+
+**Demo Approach**:
+
+1. Show a typical feature change in the old architecture (video or walkthrough)
+2. Show the same change in a vertical slice (much simpler)
+3. Explain the benefits in developer productivity terms
+4. Connect to business outcomes (faster delivery, fewer bugs)
+
+#### Strategy 4: Incremental Value Story
+
+**Approach**: Tell the story of how value accumulates slice by slice
+
+**Narrative Structure**:
+
+```
+Sprint 1: "Users can now register and view their profiles"
+├─ RegisterUserCommand implemented
+├─ GetUserProfileQuery implemented
+└─ Value Delivered: Customer acquisition possible
+
+Sprint 2: "Users can maintain accurate profile information"
+├─ UpdateUserProfileCommand implemented
+├─ ChangePasswordCommand implemented
+└─ Value Delivered: User retention improved, support tickets reduced
+
+Sprint 3: "Users have complete account lifecycle control"
+├─ DeleteUserAccountCommand implemented
+├─ Account recovery workflow implemented
+└─ Value Delivered: Compliance met (GDPR right to deletion)
+```
+
+**Benefits**: Shows incremental delivery, demonstrates predictable velocity, highlights capability evolution, makes technical work relatable to business outcomes
+
+### Demonstration Environments
+
+#### Live Demo Environment
+
+**Setup Requirements**:
+
+- Deployed working application
+- Realistic test data (anonymized production-like)
+- Network connectivity verified
+- Fallback screenshots/video if demo fails
+
+**Best Practices**:
+
+- [ ] Test demo flow 30 minutes before presentation
+- [ ] Have backup demo video ready
+- [ ] Use staging environment (not production)
+- [ ] Clear browser cache before demo
+- [ ] Bookmark demo URLs
+- [ ] Have rollback plan if deployment fails
+
+#### Local Development Demo
+
+**When to Use**: Internal engineering reviews, technical deep dives, debugging sessions, architecture discussions
+
+**What to Show**: Code organization in IDE, single slice folder structure, test execution and coverage, debug through single request, Git history showing isolated changes
+
+#### Slide Deck Walkthrough
+
+**When Live Demo Isn't Possible**: Security restrictions, network limitations, unstable features, stakeholder time constraints
+
+**Slide Content**:
+
+1. **Problem Statement** (1 slide) - User pain point or business need
+2. **Solution Architecture** (1 slide) - High-level diagram emphasizing independence
+3. **Implemented Features** (2-3 slides) - Screenshots annotated with business value
+4. **What's Next** (1 slide) - Roadmap and expected outcomes
+5. **Metrics** (1 slide) - Velocity, quality, satisfaction indicators
+
+### Tailoring to Stakeholder Types
+
+#### For Business Stakeholders (C-Suite, Directors)
+
+**Focus**: Business outcomes and ROI | **Demo Length**: 10-15 minutes maximum
+
+**Key Messages**:
+
+- ✅ "This feature enables [business capability]"
+- ✅ "Users can now [perform action] which drives [outcome]"
+- ✅ "We're delivering value every [sprint/week], not just at the end"
+- ✅ "This architecture reduces time-to-market for new features by X%"
+
+**Avoid**:
+
+- ❌ Technical jargon (handlers, repositories, CQRS)
+- ❌ Code walkthroughs
+- ❌ Architecture diagrams without business context
+
+#### For Product Managers
+
+**Focus**: Feature completeness and user experience | **Demo Length**: 15-30 minutes
+
+**Key Messages**:
+
+- ✅ "Here's how the user flow works end-to-end"
+- ✅ "These slices map to these user stories in the backlog"
+- ✅ "This slice is complete - it includes all acceptance criteria"
+- ✅ "The architecture enables us to A/B test feature variations easily"
+
+**Show**: Feature catalog with mapped user stories, acceptance criteria completeness, actual user workflows, upcoming features and dependencies
+
+#### For Technical Leadership (VPs Engineering, Architects)
+
+**Focus**: Architecture quality, maintainability, scalability | **DemoLength**: 30-45 minutes
+
+**Key Messages**:
+
+- ✅ "Each slice is independently testable and deployable"
+- ✅ "We've eliminated X% of cross-team dependencies"
+- ✅ "New developers can contribute productively in [timeframe]"
+- ✅ "This pattern supports our microservices migration strategy"
+
+**Show**: Code organization and structure, dependency graphs (minimal coupling), test coverage and quality metrics, before/after architecture comparisons, developer velocity improvements
+
+#### For End Users (User Testing, Beta Programs)
+
+**Focus**: Functionality and user experience only | **Demo Length**: 5-10 minutes of hands-on usage
+
+**Key Messages**:
+
+- ✅ "Try registering a new account"
+- ✅ "What do you think of the profile page?"
+- ✅ "Is this what you expected when you clicked X?"
+- ✅ "On a scale of 1-10, how easy was that to complete?"
+
+**Avoid**: ❌ Any mention of technical architecture | ❌ Explaining how it works | ❌ Justifying design decisions
+
+### Metrics to Highlight
+
+#### Development Velocity Metrics
+
+| Metric                    | Before Slices | After Slices | Improvement |
+| ------------------------- | ------------- | ------------ | ----------- |
+| Avg Feature Delivery Time | 12 days       | 8 days       | -33%        |
+| Files Changed per Feature | 8 files       | 3 files      | -63%        |
+| Merge Conflicts per Week  | 12            | 3            | -75%        |
+| Time to Onboard New Dev   | 15 days       | 6 days       | -60%        |
+
+#### Quality Metrics
+
+| Metric           | Before Slices | After Slices | Improvement |
+| ---------------- | ------------- | ------------ | ----------- |
+| Test Coverage    | 45%           | 82%          | +82%        |
+| Production Bugs  | 8/month       | 3/month      | -63%        |
+| Regression Rate  | 15%           | 4%           | -73%        |
+| Hotfixes/Quarter | 18            | 6            | -67%        |
+
+#### Business Impact Metrics
+
+| Metric                  | Before Slices | After Slices | Improvement |
+| ----------------------- | ------------- | ------------ | ----------- |
+| Time to Market          | 6 weeks       | 3 weeks      | -50%        |
+| Feature Adoption Rate   | 38%           | 62%          | +63%        |
+| User Satisfaction (NPS) | 42            | 58           | +38%        |
+| Support Tickets/Feature | 45            | 18           | -60%        |
+
+### Common Stakeholder Q&A
+
+**Q: "How is this different from what we had before?"**
+
+A: "Previously, adding a feature meant changing files across multiple folders. With vertical slices, everything for one feature lives in one place. This makes changes faster and safer."
+
+**Q: "Can we still reuse code between features?"**
+
+A: "Yes, through shared interfaces and domain objects. Both registration and updates use the same IUserRepository interface. This gives us reuse without tight coupling."
+
+**Q: "What if we need to change how multiple features work?"**
+
+A: "That's easier with vertical slices. To change email notifications across all features, we update the shared IEmailService interface. Each slice uses the interface, so they automatically pick up the improvement."
+
+**Q: "How do you test these slices?"**
+
+A: "Each slice includes its own tests right next to the code. We test each slice independently and we're currently at [X]% code coverage across all slices."
+
+**Q: "How long does it take to build a new slice?"**
+
+A: "Most slices take 4-16 hours fully implemented - API endpoint, business logic, data access, validation, error handling, and tests. For context, [feature name] has 3 slices and took 28 hours total."
+
+**Q: "Can we deploy slices independently?"**
+
+A: "Not quite - they share the same deployment unit. But because they're independent, we can deploy features incrementally without regression risk."
+
+**Q: "What's the ROI on this architectural change?"**
+
+A: "We're seeing [X]% faster delivery and [Y]% fewer bugs since adopting vertical slices. Onboarding time dropped from [N] weeks to [M] days. For stakeholders, this means faster time-to-market and lower maintenance costs."
+
+### Post-Demo Activities
+
+#### Gather Feedback Template
+
+```markdown
+## Stakeholder Feedback: [Feature/Demo Name]
+
+**Date**: [Date] | **Attendees**: [List] | **Presented By**: [Name]
+
+### What Resonated
+
+- [Feedback point 1]
+- [Feedback point 2]
+
+### Questions Raised
+
+- [Question 1]: [Answer/Action item]
+
+### Concerns / Blockers
+
+- [Concern 1]: [Mitigation plan]
+
+### Feature Requests
+
+- [Request 1]: [Priority/Backlog decision]
+
+### Action Items
+
+- [ ] [Action 1] - [Owner] - [Due date]
+
+### Next Demo
+
+**Target Date**: [Date] | **Focus**: [What will be demonstrated] | **Audience**: [Who should attend]
+```
+
+#### Document Decisions
+
+Capture feature direction changes, prioritization shifts, technical decisions, and update roadmap if needed.
+
+#### Share Artifacts
+
+**Distribute**: Demo recording, screenshots, updated feature catalog, sprint plan
+**Where**: Team wiki, Slack/Teams channel, email to attendees, product management system
+
+### Showcase Template
+
+```markdown
+## Vertical Slice Showcase: [Feature Name]
+
+**Date**: [Date] | **Duration**: [Minutes] | **Audience**: [Stakeholder types] | **Presenter**: [Name]
+
+### Objectives
+
+- Demonstrate [business capability]
+- Show progress on [milestone]
+- Gather feedback on [specific aspect]
+- Build confidence in vertical slice approach
+
+### Agenda
+
+1. **Context** (2 min) - Business need and user story
+2. **Demo** (5 min) - Live walkthrough of working feature
+3. **Architecture** (3 min) - Brief explanation of slice benefits
+4. **What's Next** (2 min) - Upcoming features
+5. **Q&A** (3 min) - Open discussion
+
+### Demo Script
+
+**Setup**: Environment, Test Account, Test Data
+**Walkthrough**: [Steps] → [Expected outcomes]
+**Talking Points**: [Key messages]
+
+### Success Criteria
+
+- [ ] Stakeholders understand the feature's purpose
+- [ ] Stakeholders see working functionality
+- [ ] Concerns/questions addressed
+- [ ] Feedback collected for next iteration
+- [ ] Confidence in delivery approach increased
+
+### Follow-Up
+
+- Share recording: [Due date]
+- Update backlog based on feedback: [Due date]
+- Schedule next showcase: [Target date]
+```
+
+---
+
+**Key Takeaway**: Tailor your showcase to your audience. Business stakeholders need value and outcomes. Technical leaders need architecture and quality. End users need functionality and experience. Prepare differently for each group, and use metrics that matter to them.
+
+## Quality Checklist
+
+### Planning Phase Checklist
+
+- [ ] **Requirements Analysis Complete**
+  - [ ] User stories documented
+  - [ ] Acceptance criteria defined
+  - [ ] Business value understood
+
+- [ ] **Slice Identification Complete**
+  - [ ] All user actions identified
+  - [ ] Slices follow single responsibility
+  - [ ] Each slice has clear boundary
+  - [ ] Slices are appropriately sized
+
+- [ ] **Dependency Analysis Complete**
+  - [ ] Data dependencies mapped
+  - [ ] Service dependencies identified
+  - [ ] Infrastructure needs documented
+  - [ ] Cross-slice dependencies minimal
+
+- [ ] **Validation Passed**
+  - [ ] Slices are independent (no feature-to-feature refs)
+  - [ ] Slices are complete (full vertical stack)
+  - [ ] Slices are cohesive (related logic together)
+
+- [ ] **Implementation Plan Complete**
+  - [ ] Slices prioritized by value
+  - [ ] Slices sequenced by dependency
+  - [ ] Effort estimated for each slice
+  - [ ] Risks identified and mitigated
+
+- [ ] **Specifications Complete**
+  - [ ] Each slice has detailed specification
+  - [ ] Request/response models defined
+  - [ ] Validation rules documented
+  - [ ] Error handling approach defined
+
+- [ ] **Team Alignment**
+  - [ ] Plan reviewed with team
+  - [ ] Technical feasibility validated
+  - [ ] Timeline accepted
+  - [ ] Roles and responsibilities assigned
+
+### Per-Slice Specification Checklist
+
+- [ ] Slice name follows naming conventions
+- [ ] User story and acceptance criteria documented
+- [ ] Request and response models defined
+- [ ] Validation rules specified
+- [ ] Business logic described
+- [ ] Dependencies identified
+- [ ] Error handling approach defined
+- [ ] Security considerations addressed
+- [ ] Performance targets set
+- [ ] Test strategy documented
+- [ ] Files to create/modify listed
+- [ ] Definition of done established
+
+### Quality Gates
+
+**Gate 1: After Slice Identification**
+
+- Are all user actions covered by slices?
+- Are slices appropriately sized (4-16h effort)?
+- Zero feature-to-feature dependencies?
+
+**Gate 2: After Dependency Analysis**
+
+- All dependencies documented?
+- Shared interfaces defined?
+- Risks identified with mitigation plans?
+
+**Gate 3: After Implementation Planning**
+
+- Slices prioritized and sequenced?
+- Timeline realistic and achievable?
+- Team capacity sufficient?
+
+**Gate 4: Before Implementation**
+
+- All specifications complete?
+- Team aligned on approach?
+- Technical feasibility validated?
+
+---
+
+## Summary
+
+This instruction file provides comprehensive guidance for planning vertical slice implementations. Follow the workflow systematically:
+
+1. **Analyze Requirements**: Understand user needs and business capabilities
+2. **Identify Slices**: Break down features using proven strategies
+3. **Analyze Dependencies**: Map data, service, and infrastructure needs
+4. **Sequence Implementation**: Prioritize by value, dependency, and risk
+5. **Create Specifications**: Document each slice in detail
+6. **Validate Quality**: Ensure independence, completeness, and cohesion
+
+**Key Principles**:
+
+- Plan incrementally, not exhaustively
+- Each slice delivers business value
+- Slices are independent and self-contained
+- Dependencies are explicit and minimal
+- Implementation is sequenced logically
+
+**Remember**: Good planning enables fast, confident implementation. Invest time in planning to save time in execution.
+
+---
+
+**Document Version**: 1.0.0
+**Last Updated**: 2026-02-12
+**Next Review**: 2026-05-12
+**Owner**: Architecture Team
+**Status**: Active
+
+```
+
+```
