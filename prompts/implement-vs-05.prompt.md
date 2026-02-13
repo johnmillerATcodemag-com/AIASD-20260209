@@ -1,130 +1,237 @@
 ---
 slice_id: VS-05
 phase: 1
-priority: P0
-dependencies: VS-03
+priority: High
+dependencies: VS-01
 ---
 
-# Prompt: Implement VS-05 - Decimal & Negative Support
+# Prompt: Implement VS-05 - Clear Calculator State
 
 ## Goal
 
-Add support for decimal numbers and negative numbers.
+Implement a clear button (C) to reset all calculator state and start a fresh calculation. This command slice provides users with a quick way to recover from errors or start over.
 
 ## User Story
 
-As a user, I want to work with decimal numbers (3.14) and negative numbers (-5) for real-world calculations.
+As a user, I want to clear the calculator so that I can start a new calculation from scratch.
 
 ## Implementation Steps
 
-1. **Update HTML** (`index.html`)
-   - Add decimal point button (.)
-   - Add plus/minus toggle button (+/−)
-   - Position appropriately in button grid
+1. **Create HTML clear button** (`index.html`)
+   - Add clear button with label "C" or "AC" (All Clear)
+   - Position prominently (typically top-left or top-right of calculator)
+   - Use semantic HTML with proper attributes
+   - Ensure minimum 44×44px button size for touch targets
+   - Add `id="clearBtn"` for easy selection
 
-2. **Update CSS** (`style.css`)
-   - Style new buttons consistently with other function buttons
+2. **Style clear button** (`style.css`)
+   - Style distinctly from other buttons (often red or gray)
+   - Make it visually prominent (users need to find it easily)
+   - Add hover state for desktop users
+   - Add active state for visual feedback on press
+   - Add focus state for keyboard navigation
+   - Consider making it slightly larger or double-width
 
-3. **Implement decimal logic** (`app.js`)
-   - Add event listener for decimal button
-   - Implement inputDecimal() function:
-     - Check if currentInput already contains "."
-     - If yes, do nothing (only one decimal per number)
-     - If awaitingOperand, set currentInput to "0."
-     - Otherwise, append "." to currentInput
-   - Update display
+3. **Implement clear logic** (`app.js`)
+   - Create `clearCalculator()` function that:
+     - Resets `currentValue` to "" (will display as "0")
+     - Resets `previousValue` to null or ""
+     - Resets `operation` to null
+     - Resets `awaitingOperand` to false
+     - Resets `displayError` to false
+     - Calls `updateDisplay()` to show "0"
+     - Clears any operator button highlights
 
-4. **Implement sign toggle** (`app.js`)
-   - Add event listener for +/- button
-   - Implement toggleSign() function:
-     - Parse currentInput as number
-     - Multiply by -1
-     - Update currentInput with new value
-     - Update display
+4. **Add event listeners**
+   - Add click event listener to clear button
+   - Call `clearCalculator()` on button click
+   - Provide visual feedback (active state)
 
-5. **Handle floating point precision** (`calculator.js`)
-   - Implement formatResult(number) function:
-     - Round to 10 decimal places to avoid 0.1 + 0.2 = 0.30000000004
-     - Remove trailing zeros
-     - Return cleaned string
-   - Apply to all calculation results
+5. **Add keyboard support**
+   - Add keyboard event listener for Escape key
+   - Map Escape → `clearCalculator()`
+   - Provide same functionality as button click
 
-6. **Add tests**
-   - Test decimal input (3.14, 0.5)
-   - Test blocking multiple decimals in one number
-   - Test floating point precision (0.1 + 0.2 = 0.3)
-   - Test sign toggle (5 → -5 → 5)
-   - Test calculations with negatives (-5 + 10 = 5)
-   - Test calculations with decimals (5.5 × 2 = 11)
+6. **Handle edge cases**
+   - Clear should work from any calculator state:
+     - During number input
+     - After operator selection
+     - After calculation complete
+     - From error states
+   - Clear should remove all visual indicators (operator highlights, error styling)
 
 ## Acceptance Criteria
 
-- [ ] Decimal point button adds "." to number
-- [ ] Can't add multiple decimal points to same number
-- [ ] Numbers like 0.5, 3.14, 100.99 work correctly
-- [ ] Plus/minus button toggles sign
-- [ ] Negative numbers display correctly with - sign
-- [ ] 0.1 + 0.2 displays as 0.3 (not 0.30000000004)
-- [ ] All arithmetic works with decimals and negatives
-- [ ] Trailing zeros removed from results (5.50 → 5.5)
+- [ ] Clear button (C) resets all state properties
+- [ ] Display shows "0" after clear
+- [ ] Escape key performs same action as clear button
+- [ ] Works from any calculator state (input, operation, result, error)
+- [ ] Works after error states (removes error styling)
+- [ ] Visual feedback on button press (active state)
+- [ ] All operator highlights cleared
+- [ ] Calculator ready for new input immediately after clear
 
 ## Verification Steps
 
 ### Manual Tests
 
-1. Click "3", ".", "1", "4" - displays "3.14"
-2. Click ".", "." again - only one decimal appears
-3. Click "0", ".", "5" - displays "0.5"
-4. Click "5", "+/-" - displays "-5", click "+/-" again - displays "5"
-5. Calculate "-5", "+", "10", "=" - displays "5"
-6. Calculate "5.5", "×", "2", "=" - displays "11"
-7. Calculate "0.1", "+", "0.2", "=" - displays "0.3" (not 0.30000000004)
-8. Calculate "10.50", "+", "0", "=" - displays "10.5" (trailing zero removed)
+1. Enter "42", click "C" - display shows "0", all state reset
+2. Enter "5", "+", "3", click "C" - display shows "0", operator not highlighted
+3. Calculate "5", "+", "3", "=" to get "8", click "C" - display shows "0", ready for new input
+4. Trigger an error (e.g., division by zero), click "C" - error cleared, display shows "0"
+5. Enter "123", press Escape key - display shows "0" (keyboard clear works)
+6. After clearing, enter new number - should work normally (calculator fully reset)
+7. Tab to clear button - focus outline visible
 
 ### Automated Tests
 
-Run: `npm test`
+Create test file or extend `app.test.js` to verify:
 
-- Decimal input tests pass
-- Sign toggle tests pass
-- Floating point precision tests pass
-- Decimal arithmetic tests pass
+```javascript
+// Test cases from VS-05 spec
+// TC-V5-01: currentValue "42" + click "C" → all state reset, display "0"
+// TC-V5-02: Mid-calculation (5 + 3) + click "C" → all state reset
+// TC-V5-03: Error state + click "C" → error cleared, display "0"
+// TC-V5-04: Any state + press Escape → same as click "C"
+// TC-V5-05: After equals result + click "C" → ready for new calculation
+```
 
 ## Showcase (3 min)
 
-**Setup**: Open calculator
+**Setup**: Open calculator in browser at 1024px width
 
 **Script**:
 
-1. **Decimals**: Click 3, ., 1, 4 → "Decimal numbers now work!"
-2. **Demo calculation**: 5.5, +, 2.3, = → Shows 7.8
-3. **Show precision**: 0.1, +, 0.2, = → Shows 0.3
-   - "We handle floating point precision. No weird 0.30000000004!"
-4. **Negatives**: Click 10, +/- → Shows -10
-   - "Toggle between positive and negative anytime."
-5. **Negative calc**: -5, +, 15, = → Shows 10
-   - "Full support for negative number arithmetic."
+1. **Show clear button**: "Here's the clear button, styled in red to stand out as a reset control."
+2. **Demo basic clear**: Enter 42, click C → "Instantly back to zero and ready for new input"
+3. **Demo clear mid-calculation**: Enter 5, +, 3, click C → "Clears the entire operation, not just the display"
+4. **Demo clear after result**: Calculate 5 + 3 = 8, click C → "Start fresh after any calculation"
+5. **Demo error recovery**: Trigger error, click C → "Quick recovery from error states"
+6. **Demo keyboard**: Enter 999, press Escape → "Keyboard shortcut for fast clearing"
 
-**Q&A Preview**:
+**Key Message**: "Users can always start fresh with a single button press or Escape key. The clear function resets all state and makes the calculator ready for the next calculation."
 
-- "Maximum decimal places?" → 10 places with intelligent rounding
-- "Can I make result negative?" → Yes! Use +/- after any calculation
-- "Scientific notation for huge numbers?" → Future enhancement
+## Files to Create/Modify
 
-**Key Message**: "Real-world calculations now supported with decimals and negatives, including proper floating point handling."
+- `index.html` - Add clear button (C)
+- `style.css` - Style clear button distinctly (red/gray, prominent)
+- `app.js` - Add `clearCalculator()` function, event listeners for button and Escape key
+- `app.test.js` - Unit tests for clear functionality (optional but recommended)
 
-## Files to Modify
+## Technical Notes
 
-- `index.html` - Add . and +/- buttons
-- `style.css` - Style new buttons
-- `app.js` - Add decimal and sign logic
-- `calculator.js` - Add formatResult function
-- Tests - Add decimal and negative tests
+**clearCalculator() Function:**
+```javascript
+function clearCalculator() {
+  // Reset all state properties
+  calculatorState.currentValue = "";
+  calculatorState.previousValue = null;
+  calculatorState.operation = null;
+  calculatorState.awaitingOperand = false;
+  calculatorState.displayError = false;
+
+  // Clear any operator highlights
+  document.querySelectorAll('.btn--operator').forEach(btn => {
+    btn.classList.remove('btn--active');
+  });
+
+  // Clear error styling if present
+  const displayElement = document.getElementById('display');
+  displayElement.classList.remove('display--error');
+
+  // Update display to show "0"
+  updateDisplay();
+}
+```
+
+**Event Listener for Clear Button:**
+```javascript
+// Clear button click event
+const clearBtn = document.getElementById('clearBtn');
+clearBtn.addEventListener('click', () => {
+  clearCalculator();
+});
+```
+
+**Keyboard Event Listener for Escape:**
+```javascript
+// Extend keyboard event listener to handle Escape
+document.addEventListener('keydown', (event) => {
+  // ... existing key handlers ...
+
+  // Handle Escape key for clear
+  if (event.key === 'Escape') {
+    clearCalculator();
+  }
+});
+```
+
+**State Before Clear (Example):**
+```javascript
+{
+  currentValue: "123",
+  previousValue: "456",
+  operation: "+",
+  awaitingOperand: false,
+  displayError: false
+}
+```
+
+**State After Clear:**
+```javascript
+{
+  currentValue: "",          // Empty, will display as "0"
+  previousValue: null,
+  operation: null,
+  awaitingOperand: false,
+  displayError: false
+}
+```
 
 ## Definition of Done
 
 - [ ] All acceptance criteria met
-- [ ] All tests passing
-- [ ] Floating point precision handled
 - [ ] Manual verification completed
+- [ ] Works in Chrome, Firefox, Safari, Edge
+- [ ] Clear button resets all state correctly
+- [ ] Escape key works identically to button
+- [ ] Works from all calculator states (input, operation, result, error)
+- [ ] Visual feedback clear (button active state)
+- [ ] All operator highlights removed
+- [ ] Error styling removed if present
+- [ ] Touch targets meet WCAG 2.1 AA (44×44px minimum)
+- [ ] Code follows web standards (HTML5, CSS3, modern JavaScript)
 - [ ] Showcase script executed successfully
+- [ ] Unit tests pass (if implemented)
+
+## Dependencies
+
+**Required**: VS-01 (Display Current Value)
+- Depends on `updateDisplay()` function to show "0" after clear
+- Depends on `calculatorState` object structure
+
+**Note**: While this can work after VS-01 alone, it's most useful after VS-02, VS-03, and VS-04 are implemented (when there's actually state to clear).
+
+## Next Steps
+
+After VS-05 is complete:
+- Calculator has basic error recovery mechanism
+- Users can restart calculations easily
+- Consider adding VS-06 (Delete Last Digit) for more precise corrections
+
+## Design Considerations
+
+**Clear vs All Clear (AC):**
+- Simple calculator: Just use "C" that clears everything
+- Advanced option: "CE" (Clear Entry) clears only current value, "C" clears all
+- For this slice: Single "C" button that clears everything (All Clear behavior)
+
+**Button Positioning:**
+- Common placements: Top-left, top-right, or bottom-left
+- Should be easily accessible but not accidentally pressed
+- Consider double-width button for prominence
+
+**Visual Styling:**
+- Red: Indicates destructive action (common choice)
+- Gray: Neutral, less alarming
+- Both work well - choose based on overall design theme

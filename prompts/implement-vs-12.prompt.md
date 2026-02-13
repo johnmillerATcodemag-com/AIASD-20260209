@@ -9,7 +9,7 @@ dependencies: VS-04
 
 ## Goal
 
-Add advanced mathematical operations: percentage (%), square root (√), square (x²), reciprocal (1/x).
+Add advanced mathematical operations: percentage (%), square root (√), and square (x²).
 
 ## User Story
 
@@ -21,8 +21,8 @@ As a user, I want access to advanced math functions so I can perform more comple
    - Add button for % (percentage)
    - Add button for √ (square root)
    - Add button for x² (square)
-   - Add button for 1/x (reciprocal)
    - Create "advanced" button row or section
+   - Note: Reciprocal (1/x) is optional and can be added as an enhancement
 
 2. **Update CSS** (`style.css`)
    - Style advanced operation buttons
@@ -38,15 +38,13 @@ As a user, I want access to advanced math functions so I can perform more comple
      - Throw error for negative numbers
    - Add square(value) function:
      - Return value \* value or Math.pow(value, 2)
-   - Add reciprocal(value) function:
-     - Return 1 / value
-     - Throw error for zero
    - Export all functions
+   - Optional: Add reciprocal(value) function if desired
 
 4. **Implement UI handlers in app.js**
    - Add event listeners for advanced operation buttons
    - Implement percentage logic (contextual based on pending operation)
-   - Implement unary operation handler for √, x², 1/x:
+   - Implement unary operation handler for √, x²:
      - Apply immediately to current display value
      - Update display with result
      - Can be used in further calculations

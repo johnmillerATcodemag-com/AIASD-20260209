@@ -1,0 +1,286 @@
+/* ==========================================================================
+   Web Calculator - Styles
+   ========================================================================== */
+
+/* CSS Reset & Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* Color Palette */
+  --color-bg: #f5f5f5;
+  --color-calculator-bg: #ffffff;
+  --color-display-bg: #2c3e50;
+  --color-display-text: #ffffff;
+  --color-display-error: #e74c3c;
+  --color-button-number: #ecf0f1;
+  --color-button-operator: #3498db;
+  --color-button-equals: #27ae60;
+  --color-button-clear: #e74c3c;
+  --color-button-delete: #f39c12;
+  --color-button-hover: #d5dbdb;
+  --color-button-active: #bdc3c7;
+  --color-text: #2c3e50;
+  --color-shadow: rgba(0, 0, 0, 0.1);
+
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+
+  /* Typography */
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-family-mono: 'Courier New', Courier, monospace;
+}
+
+body {
+  font-family: var(--font-family);
+  background: var(--color-bg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: var(--spacing-sm);
+}
+
+/* ==========================================================================
+   VS-01: Calculator Container
+   ========================================================================== */
+
+.calculator {
+  background: var(--color-calculator-bg);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px var(--color-shadow);
+  padding: var(--spacing-md);
+  width: 100%;
+  max-width: 400px;
+}
+
+/* ==========================================================================
+   VS-01: Display Component
+   ========================================================================== */
+
+.calculator__display {
+  background: var(--color-display-bg);
+  border-radius: 8px;
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  border: 2px solid var(--color-display-bg);
+  position: relative;
+}
+
+.calculator__display--error {
+  background: var(--color-display-error);
+  border-color: var(--color-display-error);
+}
+
+.display__value {
+  font-family: var(--font-family-mono);
+  font-size: 2rem;
+  color: var(--color-display-text);
+  font-weight: 600;
+  text-align: right;
+  word-break: break-all;
+  overflow-wrap: break-word;
+  max-width: 100%;
+}
+
+/* Truncate long numbers with ellipsis */
+.display__value--truncated::after {
+  content: '…';
+}
+
+/* ==========================================================================
+   VS-02+: Button Grid (will be populated in later slices)
+   ========================================================================== */
+
+.calculator__buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-xs);
+}
+
+/* Button Base Styles */
+.btn {
+  font-family: var(--font-family);
+  font-size: 1.25rem;
+  font-weight: 600;
+  min-height: 60px;
+  min-width: 60px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  color: var(--color-text);
+  background: var(--color-button-number);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--color-shadow);
+}
+
+.btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px var(--color-shadow);
+}
+
+/* Focus styles for accessibility (VS-07) */
+.btn:focus {
+  outline: 3px solid #3498db;
+  outline-offset: 2px;
+}
+
+/* Button Variants */
+.btn--number {
+  background: var(--color-button-number);
+}
+
+.btn--operator {
+  background: var(--color-button-operator);
+  color: white;
+}
+
+.btn--operator.btn--active {
+  background: #2980b9;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.btn--equals {
+  background: var(--color-button-equals);
+  color: white;
+  grid-column: span 3;
+}
+
+.btn--clear {
+  background: var(--color-button-clear);
+  color: white;
+  grid-column: span 2;
+}
+
+.btn--delete {
+  background: var(--color-button-delete);
+  color: white;
+  grid-column: span 2;
+}
+
+.btn--decimal {
+  background: var(--color-button-number);
+}
+
+.btn--zero {
+  background: var(--color-button-number);
+  grid-column: span 2;
+}
+
+/* Touch device optimizations */
+@media (hover: none) {
+  .btn:hover {
+    transform: none;
+  }
+
+  .btn:active {
+    background: var(--color-button-active);
+  }
+}
+
+/* ==========================================================================
+   VS-08: Responsive Design (Mobile-First)
+   ========================================================================== */
+
+/* Base styles are mobile-first (320px+) */
+@media (max-width: 374px) {
+  .calculator {
+    padding: var(--spacing-sm);
+  }
+
+  .display__value {
+    font-size: 1.75rem;
+  }
+
+  .btn {
+    min-height: 50px;
+    min-width: 50px;
+    font-size: 1.1rem;
+  }
+}
+
+/* Tablet: 768px+ */
+@media (min-width: 768px) {
+  .calculator {
+    max-width: 450px;
+  }
+
+  .display__value {
+    font-size: 2.5rem;
+  }
+
+  .btn {
+    min-height: 70px;
+    font-size: 1.5rem;
+  }
+}
+
+/* Desktop: 1024px+ */
+@media (min-width: 1024px) {
+  .calculator {
+    max-width: 500px;
+  }
+
+  .display__value {
+    font-size: 3rem;
+  }
+
+  .btn {
+    min-height: 80px;
+    font-size: 1.75rem;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .calculator__display {
+    border: 3px solid var(--color-display-text);
+  }
+
+  .btn:focus {
+    outline-width: 4px;
+  }
+}
+
+/* Dark mode support (future enhancement) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #1a1a1a;
+    --color-calculator-bg: #2c2c2c;
+    --color-text: #ffffff;
+    --color-button-number: #3a3a3a;
+    --color-button-hover: #4a4a4a;
+    --color-button-active: #2a2a2a;
+  }
+}
+
+/* Print styles */
+@media print {
+  body {
+    background: white;
+  }
+
+  .calculator {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+
+  .btn {
+    display: none;
+  }
+}

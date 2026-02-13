@@ -5,105 +5,257 @@ priority: P0
 dependencies: VS-01
 ---
 
-# Prompt: Implement VS-02 - Basic Arithmetic Logic
+# Prompt: Implement VS-02 - Input Digit & Decimal Point
 
 ## Goal
 
-Add operator buttons (+, -, ×, ÷) and implement the calculation logic.
+Enable users to input numbers (0-9) and decimal points through both button clicks and keyboard input. This command slice modifies calculator state and triggers display updates.
 
 ## User Story
 
-As a user, I want to select an arithmetic operation to perform a calculation between two numbers.
+As a user, I want to input numbers using buttons or keyboard so that I can build the calculations I need.
 
 ## Implementation Steps
 
-1. **Update HTML** (`index.html`)
-   - Add four operator buttons (+, -, ×, ÷) to the grid
-   - Update grid to 4 columns to accommodate operators
-   - Add proper ARIA labels for operators
+1. **Create HTML button structure** (`index.html`)
+   - Add number buttons 0-9 in calculator grid layout
+   - Add decimal button (.)
+   - Use `data-digit` attributes for button values
+   - Ensure minimum 44×44px button size for touch targets
+   - Organize in standard calculator number pad layout:
+     ```
+     7 8 9
+     4 5 6
+     1 2 3
+     0 .
+     ```
 
-2. **Update CSS** (`style.css`)
-   - Change grid layout to 4 columns
-   - Style operator buttons distinctly (different color)
-   - Add "active" state styling for selected operator
+2. **Style number buttons** (`style.css`)
+   - Set minimum button size: 44×44px (WCAG touch target)
+   - Add hover state for desktop users
+   - Add active state for visual feedback on press
+   - Add focus state for keyboard navigation (visible outline)
+   - Use CSS Grid for responsive button layout
+   - Style number buttons distinctly from operators (different color)
+   - Ensure adequate spacing between buttons (min 8px gap)
 
-3. **Create calculation module** (`calculator.js`)
-   - Implement add(a, b) function
-   - Implement subtract(a, b) function
-   - Implement multiply(a, b) function
-   - Implement divide(a, b) function with zero-division check
-   - Implement calculate(a, operator, b) dispatcher function
-   - Export all functions
+3. **Implement digit input logic** (`app.js`)
+   - Extend `calculatorState` object with:
+     - `awaitingOperand` (boolean, tracks if new number should replace display)
+   - Implement `handleDigitInput(digit)` function:
+     - Clear error state if present
+     - If `awaitingOperand` is true, replace `currentValue` with digit
+     - If `awaitingOperand` is false, append digit to `currentValue`
+     - Remove leading zeros (except for "0.xxx" cases)
+     - Enforce maximum length (15 digits)
+     - Set `awaitingOperand` to false
+     - Call `updateDisplay()` to reflect changes
 
-4. **Update app logic** (`app.js`)
-   - Extend state to include previousInput, operator, awaitingOperand
-   - Add event listeners for operator buttons
-   - Implement selectOperator(operator) function
-   - Store first operand when operator clicked
-   - Clear display for second operand input
-   - Handle chained operations (auto-calculate when new operator clicked)
-   - Update visual feedback (highlight active operator)
+4. **Implement decimal point logic**
+   - Add `handleDecimalInput()` function:
+     - Check if `currentValue` already contains "."
+     - If decimal present, ignore input (only one decimal allowed)
+     - If no decimal, append "."
+     - If `awaitingOperand` is true, start new number with "0."
+     - Call `updateDisplay()` to reflect changes
 
-5. **Create unit tests** (`calculator.test.js`)
-   - Test all four arithmetic operations
-   - Test edge cases (negatives, decimals, zero)
-   - Test division by zero error
-   - Achieve 100% coverage on calculator.js
+5. **Add keyboard support**
+   - Add `keydown` event listener to document
+   - Map keyboard keys 0-9 to digit input
+   - Map keyboard "." or "NumPad Decimal" to decimal input
+   - Call same `handleDigitInput()` and `handleDecimalInput()` functions
+   - Provide visual feedback on corresponding button when key pressed
+
+6. **Add event listeners**
+   - Query all number buttons with `.btn--number` class
+   - Add click event listeners calling `handleDigitInput()`
+   - Query decimal button with `.btn--decimal` class
+   - Add click event listener calling `handleDecimalInput()`
 
 ## Acceptance Criteria
 
-- [ ] Four operator buttons visible and styled distinctly
-- [ ] Clicking operator stores first operand and prepares for second
-- [ ] Selected operator is visually highlighted
-- [ ] All four operations implemented and tested
-- [ ] Chained operations work (e.g., 5 + 3 - 2)
-- [ ] Division by zero throws proper error
+- [ ] Clicking number buttons (0-9) appends digit to display
+- [ ] Clicking decimal button (.) adds decimal point
+- [ ] Only one decimal point allowed per number
+- [ ] Leading zero is removed (e.g., "07" becomes "7")
+- [ ] Exception: "0.5" keeps leading zero
+- [ ] Keyboard input (0-9, .) functions identically to buttons
+- [ ] Numbers can be up to 15 digits
+- [ ] Decimal precision up to 10 places
+- [ ] Visual feedback on button press (active state)
+- [ ] Buttons are minimum 44×44px (touch target requirement)
+- [ ] Focus outline visible for keyboard navigation
 
 ## Verification Steps
 
 ### Manual Tests
 
-1. Click "5", "+", "3" - display shows "3", plus button highlighted
-2. Refresh, click "10", "-", "4" - minus button highlighted
-3. Refresh, click "6", "×", "7" - display prepared for second operand
-4. Test chained: "5", "+", "3", "-" - should show "8" (auto-calculated 5+3)
-5. Click different operators - only one should be highlighted
+1. Open calculator, click "5" - display shows "5" (replaces default "0")
+2. Click "3", "7" - display shows "537" (digits append)
+3. Click "0", "8" - display shows "08" then "8" (leading zero removed)
+4. Click "0", ".", "5" - display shows "0.5" (leading zero preserved with decimal)
+5. Click "5", ".", "." - second decimal ignored, display shows "5."
+6. Enter 15 digits - all accepted; try 16th digit - rejected
+7. Press keyboard "8" - display shows "8"
+8. Press keyboard "." - display shows "8."
+9. Tab to number buttons - focus outline visible
+10. Test on touch device - buttons easily tappable (44×44px minimum)
 
 ### Automated Tests
 
-Run: `npm test calculator.test.js`
+Create test file (`app.test.js`) to verify:
 
-- All arithmetic tests pass
-- Division by zero test passes
-- Edge case tests pass
-- 100% code coverage achieved
+```javascript
+// Test cases from VS-02 spec
+// TC-V2-01: currentValue "0" + click "5" → "5"
+// TC-V2-02: currentValue "5" + click "3" → "53"
+// TC-V2-03: currentValue "5" + click "." → "5."
+// TC-V2-04: currentValue "5." + click "." → "5." (no change)
+// TC-V2-05: Leading zero removal: "0" + "8" → "8"
+// TC-V2-06: Leading zero preserved: "0" + "." + "5" → "0.5"
+// TC-V2-07: Max length enforcement: 15 digits max
+// TC-V2-08: Keyboard "8" → currentValue "8"
+// TC-V2-09: Keyboard "." → appends decimal
+// TC-V2-10: awaitingOperand true → replace value
+// TC-V2-11: Visual feedback on button press
+// TC-V2-12: Decimal precision up to 10 places
+```
 
 ## Showcase (4 min)
 
-**Setup**: Open calculator in browser
+**Setup**: Open calculator in browser at 1024px width
 
 **Script**:
 
-1. **Show operators**: "We've added the four arithmetic operator buttons in purple."
-2. **Demo basic operation**: Click 5, +, 3 → "The plus button highlights, showing it's active."
-3. **Show each operator**: Demo -, ×, ÷ → "All four operations ready to use."
-4. **Demo chaining**: Click 5, +, 3, - → Shows 8 → "Chained operations work - it calculated 5+3 automatically."
-5. **Show tests**: Display test results → "100% test coverage on calculation logic."
+1. **Show number pad**: "Here's our number pad with digits 0-9 and decimal point, laid out like a standard calculator."
+2. **Demo digit input**: Click 5, 3, 7 → "Digits append naturally to build numbers"
+3. **Demo leading zero**: Refresh, click 0, 8 → "Leading zeros are automatically removed for cleaner display"
+4. **Demo decimal**: Click 5, ., 2, 5 → "Decimal point works correctly"
+5. **Demo decimal validation**: Click . again → "Only one decimal allowed per number"
+6. **Demo keyboard**: Press keys 1, 2, 3 → "Full keyboard support for faster input"
+7. **Show touch targets**: Open DevTools, inspect button → "44×44px minimum ensures easy tapping on mobile"
 
-**Key Message**: "The arithmetic brain of the calculator is complete and thoroughly tested. Next slice adds the equals button to complete calculations."
+**Key Message**: "Users can now input any number using buttons or keyboard, with smart handling of leading zeros and decimals. The foundation is ready for arithmetic operations."
 
 ## Files to Create/Modify
 
-- `index.html` - Add operator buttons
-- `style.css` - Style operators
-- `app.js` - Add operator handling
-- `calculator.js` - NEW: Pure calculation logic
-- `calculator.test.js` - NEW: Unit tests
+- `index.html` - Add number buttons (0-9) and decimal button
+- `style.css` - Style buttons with proper sizing and states
+- `app.js` - Add `handleDigitInput()`, `handleDecimalInput()`, keyboard listeners
+- `app.test.js` - Unit tests for digit input logic (optional but recommended)
+
+## Technical Notes
+
+**Updated State Object:**
+```javascript
+const calculatorState = {
+  currentValue: "0",        // Current display value (string)
+  displayError: false,      // Whether to show error message
+  awaitingOperand: false    // If true, next digit replaces currentValue
+};
+```
+
+**handleDigitInput() Function:**
+```javascript
+function handleDigitInput(digit) {
+  // Clear error if present
+  if (calculatorState.displayError) {
+    calculatorState.displayError = false;
+  }
+
+  let currentValue = calculatorState.currentValue;
+
+  // Replace value if awaiting new operand
+  if (calculatorState.awaitingOperand) {
+    calculatorState.currentValue = digit;
+    calculatorState.awaitingOperand = false;
+  } else {
+    // Remove leading zero (except for "0.xxx")
+    if (currentValue === "0" && digit !== ".") {
+      calculatorState.currentValue = digit;
+    } else {
+      // Append digit if under max length
+      if (currentValue.length < 15) {
+        calculatorState.currentValue = currentValue + digit;
+      }
+    }
+  }
+
+  updateDisplay();
+}
+```
+
+**handleDecimalInput() Function:**
+```javascript
+function handleDecimalInput() {
+  let currentValue = calculatorState.currentValue;
+
+  // Start new number with "0." if awaiting operand
+  if (calculatorState.awaitingOperand) {
+    calculatorState.currentValue = "0.";
+    calculatorState.awaitingOperand = false;
+    updateDisplay();
+    return;
+  }
+
+  // Only add decimal if not already present
+  if (!currentValue.includes(".")) {
+    calculatorState.currentValue = currentValue + ".";
+    updateDisplay();
+  }
+}
+```
+
+**Keyboard Event Listener:**
+```javascript
+document.addEventListener('keydown', (event) => {
+  const key = event.key;
+
+  // Handle number keys
+  if (key >= '0' && key <= '9') {
+    handleDigitInput(key);
+    // Optional: highlight corresponding button
+    highlightButton(`[data-digit="${key}"]`);
+  }
+
+  // Handle decimal point
+  if (key === '.' || key === 'Decimal') {
+    handleDecimalInput();
+    highlightButton('.btn--decimal');
+  }
+});
+```
+
+## Validation Rules
+
+- **Maximum length**: 15 digits total (including digits before and after decimal)
+- **Only one decimal point** allowed per number
+- **No non-numeric characters** (except decimal point)
+- **Leading zero removal**: "07" → "7", but "0.7" → "0.7"
 
 ## Definition of Done
 
 - [ ] All acceptance criteria met
-- [ ] All unit tests passing (100% coverage)
 - [ ] Manual verification completed
-- [ ] Chained operations working
+- [ ] Works in Chrome, Firefox, Safari, Edge
+- [ ] Keyboard input works correctly (0-9, .)
+- [ ] Touch targets meet WCAG 2.1 AA (44×44px minimum)
+- [ ] Button states (hover, active, focus) clearly visible
+- [ ] Leading zero logic works correctly
+- [ ] Decimal point validation works (only one allowed)
+- [ ] Maximum length enforced (15 digits)
+- [ ] Code follows web standards (HTML5, CSS3, modern JavaScript)
 - [ ] Showcase script executed successfully
+- [ ] Unit tests pass (if implemented)
+
+## Dependencies
+
+**Required**: VS-01 (Display Current Value)
+- Depends on `updateDisplay()` function to show input
+- Depends on `calculatorState` object structure
+
+## Next Steps
+
+After VS-02 is complete, proceed to:
+- **VS-03**: Select Operation - Add operator buttons (+, -, ×, ÷)
+- **VS-04**: Calculate Result - Add equals button and calculation logic

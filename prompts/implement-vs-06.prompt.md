@@ -1,148 +1,203 @@
 ---
 slice_id: VS-06
 phase: 1
-priority: P0
-dependencies: VS-03
+priority: High
+dependencies: VS-01, VS-02
 ---
 
-# Prompt: Implement VS-06 - Keyboard Input
+# Prompt: Implement VS-06 - Delete Last Digit (Backspace)
 
 ## Goal
 
-Enable full keyboard support so users can perform all operations without touching the mouse.
+Implement backspace/delete functionality to remove the last entered digit, allowing users to correct mistakes without clearing everything.
 
 ## User Story
 
-As a user, I want to use my keyboard to enter numbers and operations for faster, more efficient calculations.
+As a user, I want to delete the last digit I entered so that I can correct mistakes without clearing everything.
 
 ## Implementation Steps
 
-1. **Add keyboard event listener** (`app.js`)
-   - Add document-level keydown event listener
-   - Map keyboard keys to calculator functions:
-     - Numbers: 0-9 → inputDigit()
-     - Operators: +, -, \*, / → selectOperator()
-     - Enter or = → evaluateExpression()
-     - Escape or C or Delete → clearCalculator()
-     - Decimal: . → inputDecimal()
-     - Backspace → deleteLastDigit() (if implemented in VS-07, else skip)
-   - Prevent default browser behavior where appropriate
+1. **Create HTML delete button** (`index.html`)
+   - Add delete/backspace button with symbol "⌫" or "DEL"
+   - Position near clear button or in control row
+   - Use semantic HTML with proper attributes
+   - Ensure minimum 44×44px button size for touch targets
+   - Add `id="deleteBtn"` for easy selection
 
-2. **Implement key mapping** (`app.js`)
-   - Create keyMap object:
-     ```javascript
-     const keyMap = {
-       '0'-'9': 'digit',
-       '+': 'add',
-       '-': 'subtract',
-       '*': 'multiply',
-       '×': 'multiply',
-       '/': 'divide',
-       '÷': 'divide',
-       'Enter': 'equals',
-       '=': 'equals',
-       'Escape': 'clear',
-       'c': 'clear',
-       'C': 'clear',
-       '.': 'decimal'
-     };
-     ```
-   - Route key events to appropriate handlers
+2. **Style delete button** (`style.css`)
+   - Style similar to clear but less prominent (maybe orange or gray)
+   - Add hover state for desktop users
+   - Add active state for visual feedback on press
+   - Add focus state for keyboard navigation
 
-3. **Add visual feedback** (`app.js`)
-   - When key pressed, temporarily highlight corresponding button
-   - Add/remove "pressed" class with CSS animation
-   - Show which button was activated
+3. **Implement delete logic** (`app.js`)
+   - Create `deleteLastDigit()` function:
+     - Check if `awaitingOperand` is true - if so, do nothing (awaiting new number)
+     - Read `currentValue`
+     - Remove last character using `.slice(0, -1)`
+     - If result is empty string, leave as "" (will display as "0")
+     - Update `calculatorState.currentValue`
+     - Call `updateDisplay()`
 
-4. **Update CSS** (`style.css`)
-   - Add .pressed class for button animation
-   - Create brief highlight effect (e.g., scale or brightness change)
+4. **Add event listeners**
+   - Add click event listener to delete button
+   - Add keyboard event listeners for Backspace and Delete keys
+   - Both should call `deleteLastDigit()`
 
-5. **Add tests**
-   - Test number key input
-   - Test operator keys
-   - Test Enter key for equals
-   - Test Escape for clear
-   - Test that invalid keys are ignored
+5. **Handle edge cases**
+   - Empty `currentValue` - do nothing
+   - Single character - becomes empty (displays "0")
+   - Decimal point - can be deleted (e.g., "5." → "5")
+   - After operator selection (`awaitingOperand` = true) - no effect
 
 ## Acceptance Criteria
 
-- [ ] Number keys 0-9 input digits
-- [ ] +, -, \*, / keys work for operations
-- [ ] Enter or = key evaluates expression
-- [ ] Escape, C, or Delete clears calculator
-- [ ] . key inputs decimal point
-- [ ] Buttons visually respond to keyboard input
-- [ ] Invalid keys are ignored gracefully
-- [ ] Tab navigation still works
+- [ ] Delete/Backspace button removes last character from `currentValue`
+- [ ] Backspace key performs same action
+- [ ] Delete key performs same action
+- [ ] Handles empty value gracefully (shows "0" after deletion)
+- [ ] Can delete decimal point
+- [ ] Does not affect `previousValue` or stored operation
+- [ ] No effect when `awaitingOperand` is true
+- [ ] Visual feedback on button press
 
 ## Verification Steps
 
 ### Manual Tests
 
-1. Type "5" + "3" on keyboard - displays as expected
-2. Press "Enter" -evaluates to 8
-3. Type "1" "0" "/" "2" "Enter" - displays 5
-4. Press "Escape" - clears to 0
-5. Type "3" "." "1" "4" - displays 3.14
-6. Type "\*" (asterisk) - works as multiply
-7. Type "/" (forward slash) - works as divide
-8. Watch buttons - should highlight briefly as keys pressed
-9. Press random letter keys - ignored, no errors
-10. Tab through buttons - still works alongside keyboard input
+1. Enter "123", click delete → displays "12"
+2. Click delete again → displays "1"
+3. Click delete again → displays "0" (empty string displays as "0")
+4. Enter "5", click delete → displays "0"
+5. Enter "5.2", click delete → displays "5."
+6. Click delete again → displays "5"
+7. Enter "5", "+", click delete → no effect (awaiting operand)
+8. Enter "123", press Backspace key → displays "12"
+9. Enter "456", press Delete key → displays "45"
+10. Tab to delete button - focus outline visible
 
 ### Automated Tests
 
+Create test file or extend `app.test.js` to verify:
+
 ```javascript
-test("Keyboard number input works", () => {
-  simulateKeyPress("5");
-  expect(state.currentInput).toBe("5");
-});
-
-test("Keyboard operators work", () => {
-  state.currentInput = "5";
-  simulateKeyPress("+");
-  expect(state.operator).toBe("+");
-});
-
-test("Enter key triggers evaluation", () => {
-  setupCalculation(5, "+", 3);
-  simulateKeyPress("Enter");
-  expect(state.currentInput).toBe("8");
-});
+// Test cases from VS-06 spec
+// TC-V6-01: currentValue "123" + click delete → "12"
+// TC-V6-02: currentValue "5" + click delete → "" (displays "0")
+// TC-V6-03: currentValue "" + click delete → "" (no change)
+// TC-V6-04: currentValue "5.2" + click delete → "5."
+// TC-V6-05: currentValue "5." + click delete → "5"
+// TC-V6-06: awaitingOperand true + click delete → no effect
+// TC-V6-07: Press Backspace key → same as click
 ```
 
-## Showcase (3 min)
+## Showcase (2 min)
 
-**Setup**: Calculator open, focus on it
+**Setup**: Open calculator in browser at 1024px width
 
 **Script**:
 
-1. **Demo typing**: Type "5+3" quickly on keyboard → "Watch - I never touched the mouse!"
-2. **Press Enter** → Shows 8 → "Enter key evaluates, just like a real calculator."
-3. **Type complex**: "10" "/" "2" "\*" "5" Enter → Shows 25 → "Full expression via keyboard."
-4. **Show Escape**: Press Esc → Clears → "Escape key quickly resets."
-5. **Show feedback**: Type slowly "1" "2" "3" → Buttons highlight → "Visual feedback shows what's happening."
-6. **Show mixed**: Mouse click "6", type "+4" Enter → "Mouse and keyboard work together seamlessly."
+1. **Setup mistake scenario**: "Everyone makes typos. Let me show you how to fix them..."
+2. **Type with mistake**: Enter 129 → "Oops, I meant 128, not 129"
+3. **Demo backspace**: Click ⌫ button → displays 12 → "The 9 is gone!"
+4. **Correct**: Click 8 → displays 128 → "Fixed without starting over"
+5. **Multiple deletes**: Enter 555, click delete 3 times → back to 0 → "Delete as much as needed"
+6. **Demo keyboard**: Enter 999, press Backspace key → "Keyboard backspace works too"
 
-**Q&A Preview**:
+**Key Message**: "Simple but essential—users can now correct individual mistakes without clearing everything. Much more precise than the clear button."
 
-- "What about copy/paste?" → VS-13 adds that feature
-- "Custom keyboard shortcuts?" → Future enhancement possibility
-- "Works on mobile?" → This is for physical keyboards; touch buttons still work on mobile
+## Files to Create/Modify
 
-**Key Message**: "Power users can now calculate at full speed with keyboard support. No compromises—both mouse and keyboard work perfectly."
+- `index.html` - Add delete button (⌫)
+- `style.css` - Style delete button
+- `app.js` - Add `deleteLastDigit()` function, event listeners
+- `app.test.js` - Unit tests for delete functionality (optional)
 
-## Files to Modify
+## Technical Notes
 
-- `app.js` - Add keyboard event handling
-- `style.css` - Add keyboard visual feedback
+**deleteLastDigit() Function:**
+```javascript
+function deleteLastDigit() {
+  // Don't delete if awaiting new operand
+  if (calculatorState.awaitingOperand) {
+    return;
+  }
+
+  let value = calculatorState.currentValue;
+
+  // Remove last character
+  if (value.length > 0) {
+    calculatorState.currentValue = value.slice(0, -1);
+  }
+
+  // If empty after deletion, stays empty (displays as "0")
+  updateDisplay();
+}
+```
+
+**Event Listeners:**
+```javascript
+// Delete button click event
+const deleteBtn = document.getElementById('deleteBtn');
+deleteBtn.addEventListener('click', () => {
+  deleteLastDigit();
+});
+
+// Keyboard Backspace and Delete keys
+document.addEventListener('keydown', (event) => {
+  // ... existing key handlers ...
+
+  if (event.key === 'Backspace' || event.key === 'Delete') {
+    event.preventDefault(); // Prevent browser back navigation
+    deleteLastDigit();
+  }
+});
+```
 
 ## Definition of Done
 
 - [ ] All acceptance criteria met
-- [ ] All keyboard keys working correctly
-- [ ] Visual feedback implemented
 - [ ] Manual verification completed
-- [ ] No regressions in mouse input
+- [ ] Works in Chrome, Firefox, Safari, Edge
+- [ ] Delete button removes last character correctly
+- [ ] Backspace key works identically to button
+- [ ] Delete key works identically to button
+- [ ] Edge cases handled (empty value, single character, decimal point)
+- [ ] No effect when awaiting operand (correct behavior)
+- [ ] Visual feedback clear (button active state)
+- [ ] Touch targets meet WCAG 2.1 AA (44×44px minimum)
+- [ ] Code follows web standards (HTML5, CSS3, modern JavaScript)
 - [ ] Showcase script executed successfully
+- [ ] Unit tests pass (if implemented)
+
+## Dependencies
+
+**Required**:
+- VS-01 (Display Current Value) - For display updates
+- VS-02 (Input Digit) - For `awaitingOperand` flag and `currentValue` management
+
+## Next Steps
+
+After VS-06 is complete:
+- Users have fine-grained control over input (delete single digits)
+- Combined with VS-05 (Clear), users have complete error recovery
+- Calculator UX is more forgiving of mistakes
+
+## Design Considerations
+
+**Button Symbol Options:**
+- ⌫ (Backspace symbol) - most clear visually
+- DEL - text label
+- ← (Left arrow) - alternative symbol
+- × with smaller size - delete icon
+
+**Behavior When Awaiting Operand:**
+- After pressing an operator, `awaitingOperand` is true
+- At this point, deleting doesn't make sense (we're about to start a new number)
+- So `deleteLastDigit()` returns early and does nothing
+- This prevents confusing behavior
+
+**Difference from Clear:**
+- Clear (VS-05): Resets entire calculator state
+- Delete (VS-06): Removes last digit only, preserves operation
+- Both are useful in different scenarios
