@@ -1,3 +1,16 @@
+/*
+AI-Generated: true
+Model: anthropic/claude-3.5-sonnet@2024-10-22
+Operator: User
+Chat ID: vs-01-implementation-20260213
+Prompt: Create unit tests for VS-01 to verify initial state, inputDigit function, leading zero replacement, multiple digits, and error state handling
+Started: 2026-02-13T00:18:00Z
+Ended: 2026-02-13T00:20:00Z
+Task Duration: 00:02:00
+AI Log: ai-logs/2026/02/13/vs-01-implementation-20260213/conversation.md
+Source: johnmillerATcodemag-com
+*/
+
 /**
  * VS-01 Unit Tests
  * Tests for Display & Number Input functionality
@@ -13,7 +26,7 @@ if (typeof document === 'undefined') {
     };
 }
 
-const { calculatorState, inputDigit, updateDisplay } = require('./app.js');
+const { calculatorState, inputDigit, updateDisplay } = require('../app.js');
 
 // Test Suite
 console.log('\n=== VS-01 Unit Tests ===\n');

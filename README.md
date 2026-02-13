@@ -20,7 +20,7 @@ This section documents artifacts created with AI assistance, including links to 
 
 ### Implementation Artifacts
 
-- **[Web Calculator - VS-01 Implementation](web-calculator/)** - Foundational calculator UI with display and number input (digits 0-9). Includes semantic HTML5 structure with ARIA accessibility, responsive CSS Grid layout (320px-desktop), modern gradient design, and vanilla JavaScript state management with input handling. Implements display value updates, leading zero replacement logic, and full keyboard navigation support. Complete with automated unit tests and verification checklist. ([Prompt](prompts/implement-vs-01.prompt.md) | [Verification Checklist](web-calculator/docs/VS-01-VERIFICATION.md) | [Tests](web-calculator/tests/test-vs-01.js))
+- **[Web Calculator - VS-01 Implementation](web-calculator/)** - Foundational calculator UI with display and number input (digits 0-9). Includes semantic HTML5 structure with ARIA accessibility, responsive CSS Grid layout (320px-desktop), modern gradient design, and vanilla JavaScript state management with input handling. Implements display value updates, leading zero replacement logic, and full keyboard navigation support. Complete with automated unit tests and verification checklist. ([Prompt](prompts/implement-vs-01.prompt.md) | [Verification Checklist](web-calculator/docs/VS-01-VERIFICATION.md) | [Tests](web-calculator/tests/test-vs-01.js) | [AI Log](ai-logs/2026/02/13/vs-01-implementation-20260213/conversation.md))
 
 ### Instruction Files
 
