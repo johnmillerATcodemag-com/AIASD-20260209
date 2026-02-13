@@ -114,7 +114,7 @@ body {
    =================================== */
 .calculator__buttons {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: var(--spacing-sm);
 }
 
@@ -172,9 +172,32 @@ body {
     background: linear-gradient(135deg, #5568d3 0%, #65398b 100%);
 }
 
-/* Zero Button (spans 3 columns) */
-.btn--zero {
-    grid-column: span 3;
+/* Operator and Equals buttons */
+.btn--operator {
+    background: #2d3748;
+    color: var(--color-btn-text);
+}
+
+.btn--operator:hover {
+    background: #1a202c;
+}
+
+.btn--equals {
+    background: #38a169;
+    color: var(--color-btn-text);
+}
+
+.btn--equals:hover {
+    background: #2f855a;
+}
+
+.btn--decimal {
+    background: var(--color-btn-number);
+    color: var(--color-btn-text);
+}
+
+.btn--decimal:hover {
+    background: var(--color-btn-number-hover);
 }
 
 /* ===================================
