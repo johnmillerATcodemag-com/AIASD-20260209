@@ -21,6 +21,30 @@ const calculatorState = {
   awaitingOperand: false   // If true, next digit replaces currentValue
 };
 
+/* ==========================================================================
+   VS-09: History State
+   ========================================================================== */
+
+/**
+ * History state object
+ * Stores calculation history with localStorage persistence
+ */
+const historyState = {
+  items: [],           // Array of calculation objects
+  maxItems: 20,        // Maximum number of history items (per spec)
+  isVisible: true      // Whether history panel is visible
+};
+
+/**
+ * History item structure:
+ * {
+ *   expression: "5 + 3",
+ *   result: "8",
+ *   timestamp: "2026-02-14T10:30:00Z",
+ *   id: "unique-id"
+ * }
+ */
+
 /**
  * VS-01: Update Display
  * Reads calculator state and updates the display
@@ -233,6 +257,12 @@ function handleEquals() {
     updateDisplay();
   } else {
     // Handle success
+    const operatorSymbols = { '+': '+', '-': '−', '*': '×', '/': '÷' };
+    const expression = `${previousValue} ${operatorSymbols[operation]} ${currentValue}`;
+
+    // VS-09: Add to history
+    addToHistory(expression, result.result);
+
     calculatorState.currentValue = result.result;
     calculatorState.previousValue = null;
     calculatorState.operation = null;
@@ -297,6 +327,314 @@ function deleteLastDigit() {
   }
 
   // If empty after deletion, stays empty (displays as "0")
+  updateDisplay();
+}
+
+/* ==========================================================================
+   VS-09: Calculation History
+   ========================================================================== */
+
+/**
+ * Add calculation to history
+ */
+function addToHistory(expression, result) {
+  const historyItem = {
+    expression: expression,
+    result: result,
+    timestamp: new Date().toISOString(),
+    id: Date.now().toString() + Math.random().toString(36).substr(2, 9)
+  };
+
+  // Add to beginning of array (most recent first)
+  historyState.items.unshift(historyItem);
+
+  // Keep only last 20 items (per spec)
+  if (historyState.items.length > historyState.maxItems) {
+    historyState.items = historyState.items.slice(0, historyState.maxItems);
+  }
+
+  // Save to localStorage
+  saveHistoryToLocalStorage();
+
+  // Update UI
+  renderHistory();
+}
+
+/**
+ * Render history list
+ */
+function renderHistory() {
+  const historyList = document.getElementById('historyList');
+
+  if (historyState.items.length === 0) {
+    historyList.innerHTML = '<p class="history-panel__empty">No calculations yet</p>';
+    return;
+  }
+
+  historyList.innerHTML = historyState.items.map(item => `
+    <div class="history-item" data-id="${item.id}" tabindex="0" role="button" aria-label="Recall calculation: ${item.expression} equals ${item.result}">
+      <div class="history-item__expression">${item.expression}</div>
+      <div class="history-item__result">= ${item.result}</div>
+      <div class="history-item__timestamp">${formatTimestamp(item.timestamp)}</div>
+    </div>
+  `).join('');
+
+  // Add click handlers to history items
+  document.querySelectorAll('.history-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const id = item.getAttribute('data-id');
+      recallFromHistory(id);
+    });
+
+    // Keyboard support for history items
+    item.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        const id = item.getAttribute('data-id');
+        recallFromHistory(id);
+      }
+    });
+  });
+}
+
+/**
+ * Recall value from history
+ */
+function recallFromHistory(id) {
+  const item = historyState.items.find(h => h.id === id);
+  if (item) {
+    calculatorState.currentValue = item.result;
+    calculatorState.awaitingOperand = false;
+    calculatorState.displayError = false;
+    updateDisplay();
+  }
+}
+
+/**
+ * Clear all history
+ */
+function clearHistory() {
+  if (historyState.items.length === 0) {
+    return;
+  }
+
+  if (confirm('Clear all calculation history?')) {
+    historyState.items = [];
+    saveHistoryToLocalStorage();
+    renderHistory();
+  }
+}
+
+/**
+ * Toggle history panel visibility
+ */
+function toggleHistory() {
+  const historyPanel = document.getElementById('historyPanel');
+  historyState.isVisible = !historyState.isVisible;
+
+  if (historyState.isVisible) {
+    historyPanel.classList.remove('hidden');
+  } else {
+    historyPanel.classList.add('hidden');
+  }
+}
+
+/**
+ * Save history to localStorage
+ */
+function saveHistoryToLocalStorage() {
+  try {
+    localStorage.setItem('calculatorHistory', JSON.stringify(historyState.items));
+  } catch (error) {
+    console.error('Failed to save history to localStorage:', error);
+  }
+}
+
+/**
+ * Load history from localStorage
+ */
+function loadHistoryFromLocalStorage() {
+  try {
+    const saved = localStorage.getItem('calculatorHistory');
+    if (saved) {
+      historyState.items = JSON.parse(saved);
+      renderHistory();
+    }
+  } catch (error) {
+    console.error('Failed to load history from localStorage:', error);
+    historyState.items = [];
+  }
+}
+
+/**
+ * Format timestamp for display
+ */
+function formatTimestamp(isoString) {
+  const date = new Date(isoString);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
+
+  return date.toLocaleDateString();
+}
+
+/* ==========================================================================
+   VS-10: Memory Functions
+   ========================================================================== */
+
+/**
+ * Memory state object
+ */
+const memoryState = {
+  value: 0,
+  hasValue: false
+};
+
+/**
+ * Update memory indicator visibility
+ */
+function updateMemoryIndicator() {
+  const indicator = document.getElementById('memoryIndicator');
+  if (indicator) {
+    indicator.style.display = memoryState.hasValue ? 'block' : 'none';
+  }
+}
+
+/**
+ * M+ (Memory Add)
+ * Adds current value to memory
+ */
+function memoryAdd() {
+  const value = parseFloat(calculatorState.currentValue) || 0;
+  memoryState.value += value;
+  memoryState.hasValue = true;
+  updateMemoryIndicator();
+  saveMemoryToLocalStorage();
+}
+
+/**
+ * M- (Memory Subtract)
+ * Subtracts current value from memory
+ */
+function memorySubtract() {
+  const value = parseFloat(calculatorState.currentValue) || 0;
+  memoryState.value -= value;
+  memoryState.hasValue = true;
+  updateMemoryIndicator();
+  saveMemoryToLocalStorage();
+}
+
+/**
+ * MR (Memory Recall)
+ * Loads memory value to display
+ */
+function memoryRecall() {
+  if (!memoryState.hasValue) {
+    return; // No memory to recall
+  }
+
+  calculatorState.currentValue = memoryState.value.toString();
+  calculatorState.awaitingOperand = false;
+  calculatorState.displayError = false;
+  updateDisplay();
+}
+
+/**
+ * MC (Memory Clear)
+ * Clears memory
+ */
+function memoryClear() {
+  memoryState.value = 0;
+  memoryState.hasValue = false;
+  updateMemoryIndicator();
+  saveMemoryToLocalStorage();
+}
+
+/**
+ * Save memory to localStorage
+ */
+function saveMemoryToLocalStorage() {
+  try {
+    localStorage.setItem('calculatorMemory', JSON.stringify(memoryState));
+  } catch (error) {
+    console.error('Failed to save memory to localStorage:', error);
+  }
+}
+
+/**
+ * Load memory from localStorage
+ */
+function loadMemoryFromLocalStorage() {
+  try {
+    const saved = localStorage.getItem('calculatorMemory');
+    if (saved) {
+      const loaded = JSON.parse(saved);
+      memoryState.value = loaded.value || 0;
+      memoryState.hasValue = loaded.hasValue || false;
+      updateMemoryIndicator();
+    }
+  } catch (error) {
+    console.error('Failed to load memory from localStorage:', error);
+    memoryState.value = 0;
+    memoryState.hasValue = false;
+  }
+}
+
+/* ==========================================================================
+   VS-12: Advanced Operations
+   ========================================================================== */
+
+/**
+ * Handle percentage operation
+ */
+function handlePercentage() {
+  const current = parseFloat(calculatorState.currentValue) || 0;
+
+  if (calculatorState.operation && calculatorState.previousValue) {
+    // Contextual percentage: 100 + 20% = 120 (adds 20% of 100)
+    const base = parseFloat(calculatorState.previousValue);
+    const percentValue = (current / 100) * base;
+    calculatorState.currentValue = percentValue.toString();
+  } else {
+    // Simple percentage: 20% = 0.2
+    calculatorState.currentValue = (current / 100).toString();
+  }
+
+  updateDisplay();
+}
+
+/**
+ * Handle square root operation
+ */
+function handleSquareRoot() {
+  const value = parseFloat(calculatorState.currentValue) || 0;
+
+  if (value < 0) {
+    calculatorState.displayError = true;
+    calculatorState.currentValue = 'Cannot calculate √ of negative';
+    updateDisplay();
+    return;
+  }
+
+  const result = Math.sqrt(value);
+  calculatorState.currentValue = result.toString();
+  calculatorState.awaitingOperand = true;
+  updateDisplay();
+}
+
+/**
+ * Handle square operation
+ */
+function handleSquare() {
+  const value = parseFloat(calculatorState.currentValue) || 0;
+  const result = value * value;
+
+  calculatorState.currentValue = result.toString();
+  calculatorState.awaitingOperand = true;
   updateDisplay();
 }
 
@@ -394,7 +732,7 @@ function highlightButton(selector) {
  */
 document.addEventListener('DOMContentLoaded', () => {
   console.log('Web Calculator initialized');
-  console.log('Implemented: VS-01 through VS-07');
+  console.log('Implemented: VS-01 through VS-07, VS-09, VS-10');
 
   // VS-01: Initialize display
   updateDisplay();
@@ -442,8 +780,64 @@ document.addEventListener('DOMContentLoaded', () => {
     deleteButton.addEventListener('click', deleteLastDigit);
   }
 
+  // VS-09: Add event listeners for history
+  const historyToggle = document.getElementById('historyToggle');
+  if (historyToggle) {
+    historyToggle.addEventListener('click', toggleHistory);
+  }
+
+  const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+  if (clearHistoryBtn) {
+    clearHistoryBtn.addEventListener('click', clearHistory);
+  }
+
+  // VS-09: Load history from localStorage
+  loadHistoryFromLocalStorage();
+
+  // VS-10: Add event listeners for memory buttons
+  const mcBtn = document.getElementById('mcBtn');
+  if (mcBtn) {
+    mcBtn.addEventListener('click', memoryClear);
+  }
+
+  const mrBtn = document.getElementById('mrBtn');
+  if (mrBtn) {
+    mrBtn.addEventListener('click', memoryRecall);
+  }
+
+  const mPlusBtn = document.getElementById('mPlusBtn');
+  if (mPlusBtn) {
+    mPlusBtn.addEventListener('click', memoryAdd);
+  }
+
+  const mMinusBtn = document.getElementById('mMinusBtn');
+  if (mMinusBtn) {
+    mMinusBtn.addEventListener('click', memorySubtract);
+  }
+
+  // VS-10: Load memory from localStorage
+  loadMemoryFromLocalStorage();
+
+  // VS-12: Add event listeners for advanced operations
+  const percentBtn = document.getElementById('percentBtn');
+  if (percentBtn) {
+    percentBtn.addEventListener('click', handlePercentage);
+  }
+
+  const sqrtBtn = document.getElementById('sqrtBtn');
+  if (sqrtBtn) {
+    sqrtBtn.addEventListener('click', handleSquareRoot);
+  }
+
+  const squareBtn = document.getElementById('squareBtn');
+  if (squareBtn) {
+    squareBtn.addEventListener('click', handleSquare);
+  }
+
   // Log state for debugging
   console.log('Initial state:', calculatorState);
+  console.log('History state:', historyState);
+  console.log('Memory state:', memoryState);
   console.log('All event listeners attached');
 });
 
