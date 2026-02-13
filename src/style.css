@@ -335,6 +335,17 @@ body {
   background: #138d75;
 }
 
+/* VS-16: Template buttons */
+.btn--template {
+  background: #e67e22;
+  color: white;
+  font-size: 0.75rem;
+}
+
+.btn--template:hover {
+  background: #d35400;
+}
+
 /* VS-09/10: Memory indicator */
 .memory-indicator {
   position: absolute;

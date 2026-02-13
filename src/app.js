@@ -1120,6 +1120,22 @@ document.addEventListener('DOMContentLoaded', () => {
   // VS-14: Initialize with first state
   saveStateSnapshot();
 
+  // VS-16: Add event listeners for template buttons
+  const tipBtn = document.getElementById('tipBtn');
+  if (tipBtn) {
+    tipBtn.addEventListener('click', showTipTemplate);
+  }
+
+  const discountBtn = document.getElementById('discountBtn');
+  if (discountBtn) {
+    discountBtn.addEventListener('click', showDiscountTemplate);
+  }
+
+  const taxBtn = document.getElementById('taxBtn');
+  if (taxBtn) {
+    taxBtn.addEventListener('click', showTaxTemplate);
+  }
+
   // Log state for debugging
   console.log('Initial state:', calculatorState);
   console.log('History state:', historyState);
@@ -1129,6 +1145,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Log when ready
 console.log('Calculator application loaded');
+
+/* ==========================================================================
+   VS-16: Calculation Templates
+   ========================================================================== */
+
+function showTipTemplate() {
+  const amount = parseFloat(prompt('Enter bill amount:'));
+  if (isNaN(amount)) return;
+
+  const tipPercent = parseFloat(prompt('Enter tip % (e.g., 15, 18, 20):'));
+  if (isNaN(tipPercent)) return;
+
+  const tip = (amount * tipPercent) / 100;
+  const total = amount + tip;
+
+  calculatorState.currentValue = total.toString();
+  updateDisplay();
+  addToHistory(`Bill: $${amount} + ${tipPercent}% tip`, total.toString());
+}
+
+function showDiscountTemplate() {
+  const original = parseFloat(prompt('Enter original price:'));
+  if (isNaN(original)) return;
+
+  const discountPercent = parseFloat(prompt('Enter discount % (e.g., 10, 20, 50):'));
+  if (isNaN(discountPercent)) return;
+
+  const discount = (original * discountPercent) / 100;
+  const final = original - discount;
+
+  calculatorState.currentValue = final.toString();
+  updateDisplay();
+  addToHistory(`$${original} - ${discountPercent}% off`, final.toString());
+}
+
+function showTaxTemplate() {
+  const amount = parseFloat(prompt('Enter amount:'));
+  if (isNaN(amount)) return;
+
+  const taxPercent = parseFloat(prompt('Enter tax % (e.g., 6, 8.25):'));
+  if (isNaN(taxPercent)) return;
+
+  const tax = (amount * taxPercent) / 100;
+  const total = amount + tax;
+
+  calculatorState.currentValue = total.toString();
+  updateDisplay();
+  addToHistory(`$${amount} + ${taxPercent}% tax`, total.toString());
+}
 
 /* ==========================================================================
    VS-17: Progressive Web App - Service Worker Registration
