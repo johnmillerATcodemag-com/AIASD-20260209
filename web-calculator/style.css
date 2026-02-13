@@ -66,42 +66,45 @@ body {
 }
 
 /* ===================================
-   Calculator Container
+   Calculator Container (Mobile-First: 320px+)
    =================================== */
 .calculator-container {
     width: 100%;
-    max-width: 400px;
+    max-width: 100%;
     padding: var(--spacing-sm);
 }
 
 .calculator {
+    width: 100%;
+    max-width: 100%;
     background: var(--color-bg-calculator);
     border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
-    box-shadow: 
+    padding: 1rem;
+    box-shadow:
         0 10px 40px var(--color-shadow-light),
         0 20px 80px var(--color-shadow-medium);
 }
 
 /* ===================================
-   Display Area
+   Display Area (Mobile-First)
    =================================== */
 .calculator__display {
     background: var(--color-display-bg);
     border-radius: var(--radius-md);
-    padding: var(--spacing-md) var(--spacing-sm);
+    padding: 1rem;
     margin-bottom: var(--spacing-lg);
-    min-height: 80px;
+    min-height: 4rem;
     display: flex;
     align-items: center;
     justify-content: flex-end;
     border: 2px solid #1a202c;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    font-size: 2rem;
 }
 
 .display__value {
     color: var(--color-display-text);
-    font-size: var(--font-size-display);
+    font-size: inherit;
     font-family: var(--font-family-display);
     font-weight: 400;
     text-align: right;
@@ -110,12 +113,13 @@ body {
 }
 
 /* ===================================
-   Button Grid
+   Button Grid (4×4 layout; scalable for zoom)
    =================================== */
 .calculator__buttons {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: var(--spacing-sm);
+    /* Relative units support 200% zoom (WCAG) */
 }
 
 /* ===================================
@@ -126,13 +130,14 @@ body {
     color: var(--color-btn-text);
     border: none;
     border-radius: var(--radius-sm);
-    font-size: var(--font-size-button);
+    font-size: 1.25rem;
     font-weight: 600;
-    padding: var(--spacing-md);
+    padding: var(--spacing-sm);
     cursor: pointer;
     transition: all 0.2s ease;
     box-shadow: 0 2px 8px var(--color-shadow-light);
-    min-height: 60px;
+    min-height: 44px;
+    min-width: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -201,50 +206,76 @@ body {
 }
 
 /* ===================================
-   Responsive Design
+   Responsive Design (Mobile-First: VS-08)
    =================================== */
 
-/* Small devices (320px - 480px) */
-@media (max-width: 480px) {
-    :root {
-        --font-size-display: var(--font-size-display-mobile);
-        --font-size-button: 1.1rem;
+/* Prevent horizontal scroll at any viewport */
+html {
+    overflow-x: hidden;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+/* Tablet: 768px+ */
+@media (min-width: 768px) {
+    .calculator-container {
+        max-width: 400px;
     }
-    
+
     .calculator {
+        max-width: 400px;
+        padding: 1rem;
+    }
+
+    .calculator__display {
+        font-size: 2.5rem;
+        padding: 1rem;
+        min-height: 4.5rem;
+    }
+
+    .btn {
+        min-height: 60px;
+        min-width: 44px;
+        font-size: 1.5rem;
         padding: var(--spacing-md);
     }
-    
-    .calculator__display {
-        min-height: 70px;
-        padding: var(--spacing-sm);
-    }
-    
-    .btn {
-        min-height: 50px;
-        padding: var(--spacing-sm);
-    }
 }
 
-/* Medium devices (481px - 768px) */
-@media (min-width: 481px) and (max-width: 768px) {
-    .calculator-container {
-        max-width: 420px;
-    }
-}
-
-/* Large devices (769px+) */
-@media (min-width: 769px) {
+/* Desktop: 1024px+ */
+@media (min-width: 1024px) {
     .calculator-container {
         max-width: 450px;
     }
-    
-    .calculator__display {
-        min-height: 90px;
+
+    .calculator {
+        max-width: 450px;
+        padding: 1rem;
     }
-    
+
+    .calculator__display {
+        font-size: 3rem;
+        padding: 1rem;
+        min-height: 5rem;
+    }
+
     .btn {
         min-height: 70px;
+        min-width: 44px;
+        font-size: 1.75rem;
+        padding: var(--spacing-md);
+    }
+}
+
+/* Very large screens (2560px+): cap calculator width */
+@media (min-width: 2560px) {
+    .calculator-container {
+        max-width: 450px;
+    }
+
+    .calculator {
+        max-width: 450px;
     }
 }
 

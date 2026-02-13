@@ -2,90 +2,178 @@
 slice_id: VS-08
 phase: 1
 priority: P0
-dependencies: VS-01
+dependencies: VS-01, VS-02, VS-03, VS-04, VS-05, VS-06, VS-07
 ---
 
-# Prompt: Implement VS-08 - Responsive Design Polish
+# Prompt: Implement VS-08 - Responsive Layout (Cross-Cutting)
 
 ## Goal
 
-Refine and optimize the responsive layout for all screen sizes from mobile (320px) to desktop (2560px+).
+Implement mobile-first responsive design that adapts the calculator layout across all device sizes (320px to desktop 2560px+). Refine and optimize the responsive layout so it works on smallest mobile through large desktop.
 
 ## User Story
 
-As a user, I want the calculator to look great and work perfectly on any device I use.
+As a user on any device (mobile, tablet, desktop), I want the calculator to display properly, so that I can use it comfortably on my device.
+
+## Technical Requirements (from slice)
+
+**Viewport breakpoints:**
+
+- **Mobile**: 320px–767px (base styles, portrait priority)
+- **Tablet**: 768px–1023px (larger touch targets)
+- **Desktop**: 1024px+ (mouse-optimized, larger display)
+
+**Mobile-first CSS** – Implement or align with this spec in `style.css`:
+
+```css
+/* Base (Mobile): 320px+ */
+.calculator {
+  width: 100%;
+  max-width: 100%;
+  padding: 1rem;
+}
+
+.calculator__display {
+  font-size: 2rem;
+  padding: 1rem;
+}
+
+.btn {
+  min-height: 44px;
+  min-width: 44px;
+  font-size: 1.25rem;
+}
+
+/* Tablet: 768px+ */
+@media (min-width: 768px) {
+  .calculator {
+    max-width: 400px;
+  }
+
+  .calculator__display {
+    font-size: 2.5rem;
+  }
+
+  .btn {
+    min-height: 60px;
+    font-size: 1.5rem;
+  }
+}
+
+/* Desktop: 1024px+ */
+@media (min-width: 1024px) {
+  .calculator {
+    max-width: 450px;
+  }
+
+  .calculator__display {
+    font-size: 3rem;
+  }
+
+  .btn {
+    min-height: 70px;
+    font-size: 1.75rem;
+  }
+}
+```
+
+**Grid layout:** Standard calculator layout is a 4×5 grid. Ensure CSS Grid (or equivalent) matches this structure:
+
+```
+[  7  ][  8  ][  9  ][ ÷  ]
+[  4  ][  5  ][  6  ][ ×  ]
+[  1  ][  2  ][  3  ][ −  ]
+[  0  ][  .  ][ ⌫  ][ +  ]
+[    C    ]   [   =   ]
+```
 
 ## Implementation Steps
 
-1. **Audit current responsive behavior**
-   - Test at breakpoints: 320px, 375px, 768px, 1024px, 1440px, 2560px
-   - Identify any layout issues, text sizing problems, or touch target issues
-   - Document what needs improvement
+1. **Create mobile-first base CSS**
+   - Base styles for 320px+ (no min-width media query for default)
+   - Implement CSS Grid button layout (4×5) in `style.css`
+   - Ensure calculator, display, and buttons match the slice spec above
 
-2. **Enhance mobile layout (320px-767px)**
-   - Ensure buttons are min 44x44px for touch targets
-   - Optimize font sizes for small screens
-   - Adjust spacing/padding for compact layouts
-   - Test on actual mobile devices/emulators
+2. **Define media queries for tablet and desktop**
+   - Tablet: `min-width: 768px` (max-width 400px for calculator, larger display and buttons)
+   - Desktop: `min-width: 1024px` (max-width 450px, larger display and buttons)
+   - Add max-width for very large screens (e.g. 2560px+) if needed to prevent over-stretching
 
-3. **Enhance tablet layout (768px-1023px)**
-   - Optimize button grid for tablet proportions
-   - Adjust display size appropriately
-   - Ensure landscape and portrait modes work well
+3. **Ensure minimum 44×44px touch targets**
+   - All interactive elements ≥44×44px on all devices
+   - Adjust spacing so adjacent taps do not overlap
 
-4. **Enhance desktop layout (1024px+)**
-   - Consider max-width to prevent over-stretching
-   - Add subtle hover effects (not available on mobile)
-   - Optimize for mouse interaction patterns
+4. **Orientation and zoom**
+   - Test portrait and landscape; use orientation media queries if necessary
+   - Validate text scalability and readability at 200% zoom
 
-5. **Add orientation support**
-   - Test portrait vs landscape on mobile
-   - Adjust layouts if needed for landscape mode
-   - Use orientation media queries if necessary
-
-6. **Test accessibility at all sizes**
+5. **Accessibility**
    - Focus indicators visible at all sizes
-   - ARIA labels working
-   - Keyboard navigation functional
-   - Color contrast maintained
+   - WCAG 2.1 AA compliance verified (use WCAG tools)
+   - ARIA labels and keyboard navigation functional at all breakpoints
 
-7. **Performance optimization**
-   - Minimize CSS for faster loading
-   - Optimize any images/assets
-   - Test load time on slow 3G
+6. **Cross-browser and performance**
+   - Test on Chrome, Firefox, Safari, Edge (desktop and mobile where applicable)
+   - Minimize CSS where possible; optimize assets; test on slow 3G if applicable
+   - Optional: subtle hover effects on desktop (not required on touch)
 
-8. **Update CSS** (`style.css`)
-   - Refine breakpoints based on testing
-   - Add orientation-specific rules if needed
-   - Ensure smooth scaling between breakpoints
-   - Add max-width for very large screens
+7. **Audit and refine**
+   - Test at 320px, 375px, 768px, 1024px, 1440px, 2560px
+   - Verify no horizontal scrolling at any size
+   - Refine breakpoints and spacing based on testing
 
 ## Acceptance Criteria
 
-- [ ] Usable on 320px width (iPhone SE)
-- [ ] Optimized for common mobile sizes (375px, 390px, 428px)
-- [ ] Works well on tablets (768px, 1024px)
-- [ ] Looks professional on desktop (1440px+)
-- [ ] Touch targets minimum 44x44px on mobile
+- [ ] Works on 320px minimum viewport (smallest mobile)
+- [ ] Works on 375px viewport (common mobile)
+- [ ] Works on 768px viewport (tablet)
+- [ ] Works on 1024px+ viewport (desktop)
 - [ ] No horizontal scrolling at any size
-- [ ] Text readable at all breakpoints
-- [ ] Buttons properly sized and spaced at all sizes
-- [ ] Layout works in portrait and landscape
-- [ ] Passes accessibility checks at all sizes
+- [ ] Touch targets ≥44×44px on all devices
+- [ ] Portrait and landscape orientations both work
+- [ ] Tested on Chrome, Firefox, Safari, Edge
+- [ ] WCAG 2.1 AA compliance verified
+- [ ] Focus indicators visible
+- [ ] Readable at 200% zoom
+- [ ] Text readable at all breakpoints; buttons properly sized and spaced
+
+## Implementation Checklist
+
+- [ ] Create mobile-first base CSS
+- [ ] Implement CSS Grid button layout (4×5)
+- [ ] Define media queries for tablet (768px+) and desktop (1024px+)
+- [ ] Ensure minimum 44×44px touch targets
+- [ ] Test on physical devices (if available)
+- [ ] Test on browser DevTools responsive mode
+- [ ] Test portrait and landscape orientations
+- [ ] Verify no horizontal scrolling at any size
+- [ ] Validate text scalability
+- [ ] Test zoom levels up to 200%
+- [ ] Verify accessibility with WCAG tools
+- [ ] Test on multiple browsers (Chrome, Firefox, Safari, Edge)
 
 ## Verification Steps
 
+### Critical Test Cases (from slice)
+
+| Test Case | Viewport Size             | Expected Behavior                     | Test Type     |
+| --------- | ------------------------- | ------------------------------------- | ------------- |
+| TC-V8-01  | 320×568 (iPhone SE)       | Calculator fits, no horizontal scroll | Visual        |
+| TC-V8-02  | 375×667 (iPhone 8)        | Buttons min 44×44px, touch-friendly   | Visual        |
+| TC-V8-03  | 768×1024 (iPad portrait)  | Layout optimized for tablet           | Visual        |
+| TC-V8-04  | 1024×768 (iPad landscape) | Layout adapts to landscape            | Visual        |
+| TC-V8-05  | 1920×1080 (Desktop)       | Calculator centered, appropriate size | Visual        |
+| TC-V8-06  | 3840×2160 (4K)            | Display remains readable              | Visual        |
+| TC-V8-07  | Rotate device             | Layout adapts without breaking         | Visual        |
+| TC-V8-08  | Zoom to 200%              | Content remains accessible            | Accessibility |
+
 ### Manual Testing - Screen Sizes
 
-Test on real devices and browser DevTools:
-
-- [ ] iPhone SE (320×568) - portrait & landscape
-- [ ] iPhone 14 (390×844) - portrait & landscape
-- [ ] iPad Mini (768×1024) - portrait & landscape
-- [ ] iPad Pro (1024×1366) - portrait & landscape
-- [ ] Desktop 1080p (1920×1080)
-- [ ] Desktop 2K (2560×1440)
-- [ ] Desktop 4K (3840×2160)
+- [ ] iPhone SE (320×568) – portrait & landscape
+- [ ] iPhone 8 / 14 (375×667, 390×844) – portrait & landscape
+- [ ] iPad Mini (768×1024) – portrait & landscape
+- [ ] iPad Pro (1024×1366) – portrait & landscape
+- [ ] Desktop 1080p (1920×1080), 2K (2560×1440), 4K (3840×2160)
 
 ### Manual Testing - Browsers
 
@@ -94,71 +182,37 @@ Test on real devices and browser DevTools:
 - [ ] Safari (desktop & iOS)
 - [ ] Edge (desktop)
 
-### Automated Tests
-
-Run Lighthouse audits:
+### Lighthouse (optional targets)
 
 - [ ] Mobile performance score > 90
 - [ ] Desktop performance score > 95
 - [ ] Accessibility score = 100
 - [ ] Best practices score > 90
 
-### Touch Target Test
-
-Use browser DevTools touch emulation:
-
-- [ ] All buttons easy to tap on mobile
-- [ ] No accidental taps on adjacent buttons
-- [ ] Clear visual feedback on tap
-
 ## Showcase (5 min)
 
-**Setup**: Have multiple devices/windows ready
+**Setup**: Multiple devices/windows ready
 
 **Script**:
 
-1. **Phone demo**: Show on actual iPhone/Android
-   - "Perfect on mobile - buttons are easy to tap, text is clear."
-   - Rotate to landscape - "Works beautifully in both orientations."
+1. **Phone**: Show on actual device or emulator – "Perfect on mobile; buttons easy to tap, text clear." Rotate to landscape – "Works in both orientations."
+2. **Tablet**: "Optimized for tablet; makes good use of the space."
+3. **Desktop**: "Professional on desktop without over-stretching." Optional: hover effects.
+4. **Resize**: DevTools responsive – drag 320px to 2560px; "Seamless scaling, no awkward breakpoints."
+5. **Accessibility**: Tab through at different sizes – "Focus indicators and keyboard navigation at every size."
 
-2. **Tablet demo**: Show on iPad or tablet emulator
-   - "Optimized for tablet - makes great use of the extra space."
-
-3. **Desktop demo**: Show on large monitor
-   - "Professional appearance on desktop without over-stretching."
-   - Hover over buttons - "Smooth hover effects enhance desktop experience."
-
-4. **Resize demo**: Chrome DevTools responsive mode
-   - Drag from 320px to 2560px smoothly
-   - "Seamless scaling across all sizes - no awkward breakpoints."
-
-5. **Accessibility**: Tab through on different sizes
-   - "Focus indicators and keyboard navigation perfect at every size."
-
-**Q&A Preview**:
-
-- "Does it work offline?" → VS-17 will add PWA capabilities for that
-- "Different color themes?" → VS-22 will add light/dark/custom themes
-- "Works on foldable phones?" → Yes! Responds to any screen dimensions
-
-**Key Message**: "Production-quality responsive design. Works perfectly on any device your users have."
-
-**Metrics to Share**:
-
-- "100/100 accessibility score"
-- "Sub-second load time on 3G"
-- "Tested on 15+ device configurations"
+**Key Message**: "Production-quality responsive design. Works on any device your users have."
 
 ## Files to Modify
 
-- `style.css` - Refine responsive CSS
+- `style.css` – Mobile-first responsive CSS, grid layout, media queries
 
 ## Definition of Done
 
 - [ ] All acceptance criteria met
-- [ ] Tested on real devices and emulators
-- [ ] All screen sizes working perfectly
-- [ ] Lighthouse scores meeting targets
-- [ ] Manual verification completed
-- [ ] Showcase script executed successfully
+- [ ] All critical test cases (TC-V8-01 through TC-V8-08) verified
+- [ ] Tested on real devices and/or emulators
+- [ ] No horizontal scroll at any size; touch targets ≥44×44px; readable at 200% zoom
+- [ ] WCAG 2.1 AA verified; tested on Chrome, Firefox, Safari, Edge
+- [ ] Manual verification and showcase completed
 - [ ] **MILESTONE: Phase 1 (MVP) Complete!**
