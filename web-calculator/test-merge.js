@@ -4,7 +4,7 @@ const calc = require('./calculator.js');
 // Make calculator available globally for app.js
 global.calculator = calc;
 
-console.log('Testing VS-04 with Clear Button Integration:\n');
+console.log('Testing VS-03 with Clear Button Integration:\n');
 
 // Test 1: Simple calculation
 console.log('Test 1: 5 + 3 = 8');
@@ -40,4 +40,4 @@ console.log('Pass:', app.calculatorState.currentValue === '14');
 console.log('');
 
 console.log('✅ All merge conflicts resolved!');
-console.log('🎯 VS-04 PEMDAS + Clear Button = Working');
+console.log('🎯 VS-03 PEMDAS + Clear Button = Working');
