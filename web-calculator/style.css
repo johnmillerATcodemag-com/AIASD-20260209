@@ -1,0 +1,270 @@
+/*
+AI-Generated: true
+Model: anthropic/claude-3.5-sonnet@2024-10-22
+Operator: User
+Chat ID: vs-01-implementation-20260213
+Prompt: Create responsive CSS with grid layout, modern gradient design, high-contrast display, button hover/active states, and accessibility features
+Started: 2026-02-13T00:12:00Z
+Ended: 2026-02-13T00:16:00Z
+Task Duration: 00:04:00
+AI Log: ai-logs/2026/02/13/vs-01-implementation-20260213/conversation.md
+Source: johnmillerATcodemag-com
+*/
+
+/* ===================================
+   CSS Reset & Base Styles
+   =================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Color Palette */
+    --color-bg-body: #f0f4f8;
+    --color-bg-calculator: #ffffff;
+    --color-display-bg: #2d3748;
+    --color-display-text: #ffffff;
+    --color-btn-number: #4a5568;
+    --color-btn-number-hover: #2d3748;
+    --color-btn-text: #ffffff;
+    --color-shadow-light: rgba(0, 0, 0, 0.1);
+    --color-shadow-medium: rgba(0, 0, 0, 0.15);
+    --color-focus: #4299e1;
+    
+    /* Spacing */
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 1rem;
+    --spacing-md: 1.5rem;
+    --spacing-lg: 2rem;
+    
+    /* Border Radius */
+    --radius-sm: 0.5rem;
+    --radius-md: 1rem;
+    --radius-lg: 1.5rem;
+    
+    /* Typography */
+    --font-family-display: 'Segoe UI', 'Roboto', 'Courier New', monospace;
+    --font-size-display: 2rem;
+    --font-size-display-mobile: 1.5rem;
+    --font-size-button: 1.25rem;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-sm);
+}
+
+/* ===================================
+   Calculator Container
+   =================================== */
+.calculator-container {
+    width: 100%;
+    max-width: 400px;
+    padding: var(--spacing-sm);
+}
+
+.calculator {
+    background: var(--color-bg-calculator);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: 
+        0 10px 40px var(--color-shadow-light),
+        0 20px 80px var(--color-shadow-medium);
+}
+
+/* ===================================
+   Display Area
+   =================================== */
+.calculator__display {
+    background: var(--color-display-bg);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md) var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    border: 2px solid #1a202c;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.display__value {
+    color: var(--color-display-text);
+    font-size: var(--font-size-display);
+    font-family: var(--font-family-display);
+    font-weight: 400;
+    text-align: right;
+    word-break: break-all;
+    line-height: 1.2;
+}
+
+/* ===================================
+   Button Grid
+   =================================== */
+.calculator__buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-sm);
+}
+
+/* ===================================
+   Buttons
+   =================================== */
+.btn {
+    background: var(--color-btn-number);
+    color: var(--color-btn-text);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-button);
+    font-weight: 600;
+    padding: var(--spacing-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px var(--color-shadow-light);
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn:hover {
+    background: var(--color-btn-number-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--color-shadow-medium);
+}
+
+.btn:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px var(--color-shadow-light);
+}
+
+.btn:focus {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+}
+
+.btn:focus:not(:focus-visible) {
+    outline: none;
+}
+
+.btn:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+}
+
+/* Number Button Specific Styles */
+.btn--number {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.btn--number:hover {
+    background: linear-gradient(135deg, #5568d3 0%, #65398b 100%);
+}
+
+/* Zero Button (spans 3 columns) */
+.btn--zero {
+    grid-column: span 3;
+}
+
+/* ===================================
+   Responsive Design
+   =================================== */
+
+/* Small devices (320px - 480px) */
+@media (max-width: 480px) {
+    :root {
+        --font-size-display: var(--font-size-display-mobile);
+        --font-size-button: 1.1rem;
+    }
+    
+    .calculator {
+        padding: var(--spacing-md);
+    }
+    
+    .calculator__display {
+        min-height: 70px;
+        padding: var(--spacing-sm);
+    }
+    
+    .btn {
+        min-height: 50px;
+        padding: var(--spacing-sm);
+    }
+}
+
+/* Medium devices (481px - 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+    .calculator-container {
+        max-width: 420px;
+    }
+}
+
+/* Large devices (769px+) */
+@media (min-width: 769px) {
+    .calculator-container {
+        max-width: 450px;
+    }
+    
+    .calculator__display {
+        min-height: 90px;
+    }
+    
+    .btn {
+        min-height: 70px;
+    }
+}
+
+/* ===================================
+   Accessibility Enhancements
+   =================================== */
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    .calculator__display {
+        border-width: 3px;
+    }
+    
+    .btn {
+        border: 2px solid var(--color-btn-text);
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .btn:hover {
+        transform: none;
+    }
+    
+    .btn:active {
+        transform: none;
+    }
+}
+
+/* Focus Visible for keyboard navigation */
+@supports selector(:focus-visible) {
+    .btn:focus {
+        outline: none;
+    }
+    
+    .btn:focus-visible {
+        outline: 3px solid var(--color-focus);
+        outline-offset: 2px;
+    }
+}
