@@ -1,8 +1,9 @@
+---
 name: senior-developer
 description: Code quality, best practices, mentoring, and problem-solving expert
 argument-hint: "code to review, feature to implement, or technical problem to solve"
-tools: ['execute', 'vscode', 'execute', 'read', 'agent', 'edit', 'search', 'web', 'todo']
-
+tools: ['execute', 'read', 'agent', 'edit', 'search', 'web', 'todo']
+---
 
 # Senior Developer Agent
 
