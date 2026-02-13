@@ -483,6 +483,90 @@ function formatTimestamp(isoString) {
 }
 
 /* ==========================================================================
+   VS-19: Export History
+   ========================================================================== */
+
+/**
+ * Export history to CSV format
+ */
+function exportHistoryToCSV() {
+  if (historyState.items.length === 0) {
+    alert('No history to export');
+    return;
+  }
+
+  // Create CSV headers
+  const headers = 'Timestamp,Expression,Result\n';
+
+  // Create CSV rows
+  const rows = historyState.items
+    .map(item => {
+      const timestamp = new Date(item.timestamp).toLocaleString();
+      return `"${timestamp}","${item.expression}","${item.result}"`;
+    })
+    .join('\n');
+
+  const csv = headers + rows;
+
+  // Create blob and download
+  downloadFile(csv, `calculator-history-${getCurrentDateString()}.csv`, 'text/csv');
+}
+
+/**
+ * Export history to TXT format
+ */
+function exportHistoryToTXT() {
+  if (historyState.items.length === 0) {
+    alert('No history to export');
+    return;
+  }
+
+  // Create text format
+  const title = 'Calculator History\n';
+  const separator = '='.repeat(50) + '\n\n';
+
+  const content = historyState.items
+    .map(item => {
+      const timestamp = new Date(item.timestamp).toLocaleString();
+      return `[${timestamp}]\n${item.expression} = ${item.result}\n`;
+    })
+    .join('\n');
+
+  const txt = title + separator + content;
+
+  // Create blob and download
+  downloadFile(txt, `calculator-history-${getCurrentDateString()}.txt`, 'text/plain');
+}
+
+/**
+ * Generic file download helper
+ */
+function downloadFile(content, filename, mimeType) {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+
+  // Cleanup
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 100);
+}
+
+/**
+ * Get current date as string for filename
+ */
+function getCurrentDateString() {
+  return new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+}
+
+/* ==========================================================================
    VS-10: Memory Functions
    ========================================================================== */
 
@@ -821,7 +905,7 @@ function highlightButton(selector) {
  */
 document.addEventListener('DOMContentLoaded', () => {
   console.log('Web Calculator initialized');
-  console.log('Implemented: VS-01 through VS-07, VS-09, VS-10');
+  console.log('Implemented: VS-01 through VS-07, VS-09, VS-10, VS-12, VS-13, VS-19');
 
   // VS-01: Initialize display
   updateDisplay();
@@ -878,6 +962,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const clearHistoryBtn = document.getElementById('clearHistoryBtn');
   if (clearHistoryBtn) {
     clearHistoryBtn.addEventListener('click', clearHistory);
+  }
+
+  // VS-19: Add event listener for export button
+  const exportCsvBtn = document.getElementById('exportCsvBtn');
+  if (exportCsvBtn) {
+    exportCsvBtn.addEventListener('click', exportHistoryToCSV);
   }
 
   // VS-09: Load history from localStorage

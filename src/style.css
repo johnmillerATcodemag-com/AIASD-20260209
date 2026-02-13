@@ -425,6 +425,11 @@ body {
   color: var(--color-text);
 }
 
+.history-panel__actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
 .btn-icon {
   background: transparent;
   border: none;
