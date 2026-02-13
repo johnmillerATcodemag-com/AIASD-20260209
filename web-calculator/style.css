@@ -26,8 +26,13 @@ Source: johnmillerATcodemag-com
     --color-bg-calculator: #ffffff;
     --color-display-bg: #2d3748;
     --color-display-text: #ffffff;
+    --color-display-error: #fc8181;
     --color-btn-number: #4a5568;
     --color-btn-number-hover: #2d3748;
+    --color-btn-equals: #48bb78;
+    --color-btn-equals-hover: #38a169;
+    --color-btn-clear: #f56565;
+    --color-btn-clear-hover: #e53e3e;
     --color-btn-text: #ffffff;
     --color-shadow-light: rgba(0, 0, 0, 0.1);
     --color-shadow-medium: rgba(0, 0, 0, 0.15);
@@ -107,6 +112,11 @@ body {
     text-align: right;
     word-break: break-all;
     line-height: 1.2;
+}
+
+.display__value.error {
+    color: var(--color-display-error);
+    font-size: 1.2rem;
 }
 
 /* ===================================
@@ -198,6 +208,29 @@ body {
 
 .btn--decimal:hover {
     background: var(--color-btn-number-hover);
+}
+
+/* Equals Button Styles */
+.btn--equals {
+    background: var(--color-btn-equals);
+    grid-column: span 1;
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.btn--equals:hover {
+    background: var(--color-btn-equals-hover);
+}
+
+/* Clear Button Styles */
+.btn--clear {
+    background: var(--color-btn-clear);
+    grid-column: 4;
+    font-weight: 700;
+}
+
+.btn--clear:hover {
+    background: var(--color-btn-clear-hover);
 }
 
 /* ===================================

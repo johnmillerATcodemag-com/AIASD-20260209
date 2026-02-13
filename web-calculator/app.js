@@ -26,22 +26,22 @@
 /** @typedef {NumberToken | OperatorToken} ExpressionToken */
 
 const calculatorState = {
-  /** Current display value / operand being entered (alias: currentInput for tests) */
-  currentValue: "0",
-  /** @type {string} Kept in sync with currentValue for VS-01 test compatibility */
-  currentInput: "0",
-  /** First operand when using single-op model (legacy) */
-  previousValue: "",
-  /** Last selected operation: "+", "-", "*", "/" */
-  operation: "",
-  /** True after operator or equals; next digit starts a new number */
-  awaitingOperand: false,
-  /** Tokens for multi-op PEMDAS: [{ type, value }, ...] */
-  expressionTokens: [],
-  /** When true, display shows error message */
-  displayError: false,
-  /** Error message to show (e.g. "Cannot divide by zero") */
-  displayErrorMessage: ""
+    /** Current display value / operand being entered */
+    currentValue: "0",
+    /** @type {string} Alias for currentValue (VS-01 test compatibility) */
+    currentInput: "0",
+    /** First operand when using single-op model (legacy) */
+    previousValue: "",
+    /** Last selected operation: "+", "-", "*", "/" */
+    operation: "",
+    /** True after operator or equals; next digit starts a new number */
+    awaitingOperand: false,
+    /** Tokens for multi-op PEMDAS: [{ type, value }, ...] */
+    expressionTokens: [],
+    /** When true, display shows error message */
+    displayError: false,
+    /** Error message to show (e.g. "Cannot divide by zero") */
+    displayErrorMessage: ""
 };
 
 // ===================================
@@ -50,6 +50,8 @@ const calculatorState = {
 
 let displayElement = null;
 let numberButtons = null;
+let equalsButton = null;
+let clearButton = null;
 
 // ===================================
 // Display
@@ -220,6 +222,25 @@ function handleEquals() {
   updateDisplay();
 }
 
+/**
+ * Clears the calculator to initial state (VS-04 compatible)
+ */
+function clearCalculator() {
+  calculatorState.currentValue = "0";
+  calculatorState.currentInput = "0";
+  calculatorState.previousValue = "";
+  calculatorState.operation = "";
+  calculatorState.awaitingOperand = false;
+  calculatorState.expressionTokens = [];
+  calculatorState.displayError = false;
+  calculatorState.displayErrorMessage = "";
+
+  if (displayElement && displayElement.classList) {
+    displayElement.classList.remove('error');
+  }
+  updateDisplay();
+}
+
 // ===================================
 // Event Handlers
 // ===================================
@@ -273,6 +294,8 @@ function initializeEventListeners() {
   });
   const equalsBtn = document.getElementById("equalsBtn");
   if (equalsBtn) equalsBtn.addEventListener("click", handleEquals);
+  const clearBtn = document.getElementById("clearBtn");
+  if (clearBtn) clearBtn.addEventListener("click", clearCalculator);
   document.addEventListener("keydown", handleKeydown);
 }
 
@@ -311,6 +334,7 @@ if (typeof module !== "undefined" && module.exports) {
     updateDisplay,
     selectOperator,
     handleEquals,
+    clearCalculator,
     OPERATOR_MAP
   };
 }
