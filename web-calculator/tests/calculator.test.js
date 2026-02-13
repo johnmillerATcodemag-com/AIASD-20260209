@@ -5,18 +5,6 @@
 
 const { calculate, evaluateExpression } = require("../calculator.js");
 
-function assertEqual(actual, expected, label) {
-  const pass = actual === expected;
-  console.log(`  ${label}: ${pass ? "✅" : "❌"} expected "${expected}", got "${actual}"`);
-  return pass;
-}
-
-function assertError(result, expectedMessage, label) {
-  const ok = result && result.error === true && result.message === expectedMessage;
-  console.log(`  ${label}: ${ok ? "✅" : "❌"} expected error "${expectedMessage}", got ${JSON.stringify(result)}`);
-  return ok;
-}
-
 // ---------- Critical test cases (slice) ----------
 
 function runCriticalTests() {
@@ -90,7 +78,7 @@ function runPemdasTests() {
   if (r1 && !r1.error && r1.result === "11") passed++;
   else console.log("  5+3×2=11: ❌", r1);
 
-  // 10 - 6 ÷ 2 = 7
+  // 10 - 6 ÷ 2 = 7 (ASCII minus)
   total++;
   const t2 = [
     { type: "number", value: "10" },
@@ -102,6 +90,19 @@ function runPemdasTests() {
   const r2 = evaluateExpression(t2);
   if (r2 && !r2.error && r2.result === "7") passed++;
   else console.log("  10-6÷2=7: ❌", r2);
+
+  // 10 − 6 ÷ 2 = 7 (Unicode minus "−" as from keyboard) – keyboard subtraction
+  total++;
+  const t2u = [
+    { type: "number", value: "10" },
+    { type: "operator", value: "−" },
+    { type: "number", value: "6" },
+    { type: "operator", value: "÷" },
+    { type: "number", value: "2" }
+  ];
+  const r2u = evaluateExpression(t2u);
+  if (r2u && !r2u.error && r2u.result === "7") passed++;
+  else console.log("  10−6÷2=7 (Unicode −): ❌", r2u);
 
   // 2 × 3 + 4 × 5 = 26
   total++;

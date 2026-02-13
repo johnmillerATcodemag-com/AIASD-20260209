@@ -14,7 +14,7 @@
 /** @typedef {CalculateSuccess | CalculateError} CalculateResult */
 
 const MAX_DECIMAL_PLACES = 10;
-const PRECISION_MULTIPLIER = 10000000000;
+const PRECISION_MULTIPLIER = Math.pow(10, MAX_DECIMAL_PLACES);
 const MAX_DIGITS = 15;
 
 /**
@@ -77,10 +77,17 @@ function evaluateExpression(tokens) {
     return { error: true, message: "Invalid input" };
   }
 
-  // Copy and normalize operator symbols (× → *, ÷ → /)
+  // Copy and normalize operator symbols (× → *, ÷ → /, − → -)
   const normalized = tokens.map((t) => {
     if (t.type === "operator") {
-      const v = t.value === "×" ? "*" : t.value === "÷" ? "/" : t.value;
+      const v =
+        t.value === "×"
+          ? "*"
+          : t.value === "÷"
+            ? "/"
+            : t.value === "−"
+              ? "-"
+              : t.value;
       return { type: "operator", value: v };
     }
     return { type: "number", value: String(t.value) };

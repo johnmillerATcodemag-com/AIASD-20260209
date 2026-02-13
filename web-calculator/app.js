@@ -4,6 +4,17 @@
  * State: currentValue (display/current operand), expressionTokens (for PEMDAS),
  * previousValue, operation, awaitingOperand, displayError / displayErrorMessage.
  * currentInput is kept in sync with currentValue for backward compatibility with VS-01 tests.
+ *
+ * AI-Generated: true
+ * Model: anthropic/claude-3.5-sonnet@2024-10-22
+ * Operator: User
+ * Chat ID: vs-04-implementation-20260213
+ * Prompt: Implement VS-04 (Calculate Result with equals, PEMDAS, precision, tests)
+ * Started: 2026-02-13T00:00:00Z
+ * Ended: 2026-02-13T00:00:00Z
+ * Task Duration: 00:00:00
+ * AI Log: ai-logs/2026/02/13/vs-04-implementation-20260213/conversation.md
+ * Source: Cursor
  */
 
 // ===================================
@@ -74,6 +85,9 @@ function inputDigit(digit) {
     calculatorState.currentValue = digit === "0" ? "0" : digit;
     calculatorState.currentInput = calculatorState.currentValue;
     calculatorState.awaitingOperand = false;
+    calculatorState.expressionTokens = [];
+    calculatorState.previousValue = "";
+    calculatorState.operation = "";
     updateDisplay();
     return;
   }
@@ -107,6 +121,9 @@ function inputDecimal() {
     calculatorState.currentValue = "0.";
     calculatorState.currentInput = "0.";
     calculatorState.awaitingOperand = false;
+    calculatorState.expressionTokens = [];
+    calculatorState.previousValue = "";
+    calculatorState.operation = "";
     updateDisplay();
     return;
   }
