@@ -50,6 +50,7 @@ const calculatorState = {
 
 let displayElement = null;
 let numberButtons = null;
+let backspaceButton = null;
 let equalsButton = null;
 let clearButton = null;
 
@@ -223,6 +224,45 @@ function handleEquals() {
 }
 
 /**
+ * Deletes the last character from the current input
+ * Handles edge cases like single digit, empty input, and error states
+ */
+function deleteLastDigit() {
+  // Reset error state if present
+  if (calculatorState.displayError) {
+    calculatorState.displayError = false;
+    calculatorState.displayErrorMessage = "";
+    calculatorState.currentValue = "0";
+    calculatorState.currentInput = "0";
+    calculatorState.awaitingOperand = false;
+    updateDisplay();
+    return;
+  }
+  
+  const cur = calculatorState.currentValue;
+  // If current input has only one character (or just "0"), set to "0"
+  if (cur.length === 1) {
+    calculatorState.currentValue = "0";
+  }
+  // If current input is just a negative sign "-", set to "0"
+  else if (cur === "-") {
+    calculatorState.currentValue = "0";
+  }
+  // Otherwise, remove the last character
+  else {
+    calculatorState.currentValue = cur.slice(0, -1);
+    
+    // If result is empty or just a negative sign, set to "0"
+    if (calculatorState.currentValue === "" || calculatorState.currentValue === "-") {
+      calculatorState.currentValue = "0";
+    }
+  }
+  
+  calculatorState.currentInput = calculatorState.currentValue;
+  updateDisplay();
+}
+
+/**
  * Clears the calculator to initial state (VS-04 compatible)
  */
 function clearCalculator() {
@@ -260,6 +300,13 @@ function handleOperatorClick(event) {
 }
 
 function handleKeydown(event) {
+  // Handle Backspace key (VS-07 integration)
+  if (event.key === "Backspace") {
+    event.preventDefault();
+    deleteLastDigit();
+    return;
+  }
+  
   if (event.key === "Enter") {
     const tag = event.target && event.target.tagName ? event.target.tagName.toLowerCase() : "";
     if (tag !== "input" && tag !== "textarea") {
@@ -294,8 +341,15 @@ function initializeEventListeners() {
   });
   const equalsBtn = document.getElementById("equalsBtn");
   if (equalsBtn) equalsBtn.addEventListener("click", handleEquals);
+  
+  // VS-07: Backspace button
+  backspaceButton = document.getElementById("backspaceBtn");
+  if (backspaceButton) backspaceButton.addEventListener("click", deleteLastDigit);
+  
+  // Clear button
   const clearBtn = document.getElementById("clearBtn");
   if (clearBtn) clearBtn.addEventListener("click", clearCalculator);
+  
   document.addEventListener("keydown", handleKeydown);
 }
 
@@ -334,6 +388,7 @@ if (typeof module !== "undefined" && module.exports) {
     updateDisplay,
     selectOperator,
     handleEquals,
+    deleteLastDigit,
     clearCalculator,
     OPERATOR_MAP
   };

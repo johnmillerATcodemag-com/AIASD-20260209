@@ -45,6 +45,15 @@ web-calculator/
 - Keyboard navigation support
 - Modern gradient design with smooth interactions
 
+### ✅ VS-07: Backspace Functionality (Implemented)
+
+- Backspace button (⌫) to delete last entered digit
+- Keyboard Backspace key support
+- Handles edge cases (single digit, decimals, negative numbers)
+- Error state clearing
+- Visual feedback with red gradient styling
+- [Verification Report](docs/VS-07-VERIFICATION.md)
+
 ## Getting Started
 
 ### Run the Calculator
@@ -62,26 +71,34 @@ Start-Process "index.html"
 
 ```bash
 # Node.js required
+
+# VS-01 tests (number input)
 node tests/test-vs-01.js
+
+# VS-07 tests (backspace functionality)
+node tests/test-vs-07.js
 ```
 
-Expected output:
+Expected output (VS-07):
 ```
-=== VS-01 Unit Tests ===
-Test 1: Initial state is "0" ✅ PASS
-Test 2: inputDigit() appends digits correctly ✅ PASS
-Test 3: Leading zero replacement works ✅ PASS
-Test 4: Multiple digits work correctly ✅ PASS
-Test 5: Error state clears on new input ✅ PASS
-=== Test Summary ===
-Passed: 5/5
-Status: ✅ ALL TESTS PASSED
+=== VS-07: Backspace Functionality Tests ===
+✅ All 17 tests passed
+
+Test Coverage:
+  • Basic backspace functionality
+  • Single digit handling
+  • Decimal point deletion
+  • Error state clearing
+  • Negative number handling
+  • Edge cases (empty, long numbers, etc.)
+  • Integration with existing functionality
 ```
 
 ## Usage
 
 1. **Enter Numbers**: Click number buttons (0-9) to enter digits
-2. **Current Slice**: Only number input and display are implemented
+2. **Delete Mistakes**: Click backspace (⌫) or press Backspace key to remove last digit
+3. **Keyboard Support**: Use number keys (0-9) and Backspace key
 
 ## Browser Support
 
@@ -119,7 +136,9 @@ const calculatorState = {
 
 - `updateDisplay()` - Syncs state to DOM
 - `inputDigit(digit)` - Handles digit input with leading zero logic
+- `deleteLastDigit()` - Removes last character with edge case handling
 - `handleNumberClick(event)` - Event handler for button clicks
+- `handleKeydown(event)` - Keyboard event handler (numbers and backspace)
 
 ### Responsive Breakpoints
 
@@ -131,42 +150,48 @@ const calculatorState = {
 
 ### Manual Testing
 
-See [docs/VS-01-VERIFICATION.md](docs/VS-01-VERIFICATION.md) for complete manual testing checklist.
+See [docs/VS-01-VERIFICATION.md](docs/VS-01-VERIFICATION.md) and [docs/VS-07-VERIFICATION.md](docs/VS-07-VERIFICATION.md) for complete manual testing checklists.
 
 ### Automated Tests
 
-Current test coverage: 100% of core functions
-- 5 unit tests
-- All passing ✅
+- **VS-01**: 5 unit tests ✅
+- **VS-07**: 17 unit tests ✅
+- **Calculator**: 19 unit tests ✅
+- **Total**: 41 tests, all passing
+
+Current test coverage: 100% of implemented functions
 
 ## Future Enhancements
 
-- [ ] **VS-02**: Decimal point support
-- [ ] **VS-03**: Basic operations (+, -, ×, ÷)
-- [ ] **VS-04**: Clear (C) and all-clear (AC) functionality
-- [ ] **VS-05**: Delete/backspace functionality
-- [ ] **VS-06**: Keyboard number input (0-9 keys)
-- [ ] **VS-07**: Calculation engine with operator precedence
+- [ ] **VS-08**: Clear (C) button functionality
+- [ ] **VS-09**: Additional decimal operations
+- [ ] **VS-10**: Advanced calculator features
+- [ ] **VS-11**: Memory functions (M+, M-, MR, MC)
 
 ## Documentation
-
-- **[Verification Checklist](docs/VS-01-VERIFICATION.md)** - Manual testing guide and showcase script
+### VS-01: Display & Number Input
+- **[Verification Report](docs/VS-01-VERIFICATION.md)** - Manual testing guide and showcase script
 - **[Implementation Prompt](../prompts/implement-vs-01.prompt.md)** - Original implementation specification
 - **[AI Conversation Log](../ai-logs/2026/02/13/vs-01-implementation-20260213/conversation.md)** - Full development conversation
+
+### VS-07: Backspace Functionality
+- **[Verification Report](docs/VS-07-VERIFICATION.md)** - Complete verification and testing results
+- **[Implementation Prompt](../prompts/implement-vs-07.prompt.md)** - Implementation specification
+- **[AI Conversation Log](../ai-logs/2026/02/13/vs-07-implementation-20260213/conversation.md)** - Development conversation
+- **[Session Summary](../ai-logs/2026/02/13/vs-07-implementation-20260213/summary.md)** - Implementation summary
 
 ## Tech Stack
 
 - **HTML5**: Semantic markup with ARIA accessibility
 - **CSS3**: Custom properties, Grid layout, responsive design
 - **JavaScript (ES6+)**: Vanilla JS, no frameworks or dependencies
-- **Testing**: Node.js-based unit tests
-
-## License
-
-Part of the AIASD-20260209 project.
+- **Testing**: Node.js-based unit tests with comprehensive coverage
 
 ---
 
-**Version**: VS-01
+**Version**: VS-01 + VS-07
 **Last Updated**: 2026-02-13
-**Status**: ✅ Foundational features complete
+**Status**: ✅ Number input, calculator operations, and backspace complete
+**Implemented Slices**: VS-01, VS-04, VS-07
+
+Part of the AIASD-20260209 project.
