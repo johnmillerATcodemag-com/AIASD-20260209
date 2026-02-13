@@ -15,15 +15,9 @@
 /** @typedef {NumberToken | OperatorToken} ExpressionToken */
 
 const calculatorState = {
-    currentInput: '0',      // Current display value
-    previousInput: null,    // Previous operand
-    operator: null,         // Current operator (+, -, ×, ÷)
-    waitingForOperand: false, // Flag indicating waiting for next number
-    hasError: false,        // Error state flag
-    lastOperation: null ,    // Store last operation for repeat equals
-    /** Current display value / operand being entered (alias: currentInput for tests) */
+    /** Current display value / operand being entered */
     currentValue: "0",
-    /** @type {string} Kept in sync with currentValue for VS-01 test compatibility */
+    /** @type {string} Alias for currentValue (VS-01 test compatibility) */
     currentInput: "0",
     /** First operand when using single-op model (legacy) */
     previousValue: "",
@@ -212,178 +206,22 @@ function handleEquals() {
 }
 
 /**
- * Evaluates the current expression
- * Handles calculation, error checking, and result chaining
- */
-function evaluateExpression() {
-    // Need both operands and an operator
-    if (calculatorState.previousInput === null || calculatorState.operator === null) {
-        // Store for repeat equals
-        calculatorState.lastOperation = {
-            value: parseFloat(calculatorState.currentInput),
-            operator: '+',
-            operand: 0
-        };
-        return;
-    }
-
-    const prev = parseFloat(calculatorState.previousInput);
-    const current = parseFloat(calculatorState.currentInput);
-    const operator = calculatorState.operator;
-
-    // Store operation for repeat equals
-    calculatorState.lastOperation = {
-        value: prev,
-        operator: operator,
-        operand: current
-    };
-
-    let result;
-
-    try {
-        // Perform calculation based on operator
-        switch (operator) {
-            case '+':
-                result = prev + current;
-                break;
-            case '-':
-                result = prev - current;
-                break;
-            case '×':
-                result = prev * current;
-                break;
-            case '÷':
-                if (current === 0) {
-                    displayError('Cannot divide by zero');
-                    return;
-                }
-                result = prev / current;
-                break;
-            default:
-                return;
-        }
-
-        // Handle potential calculation errors
-        if (!isFinite(result)) {
-            displayError('Invalid calculation');
-            return;
-        }
-
-        // Format result (remove unnecessary decimals)
-        result = parseFloat(result.toFixed(10));
-
-        // Update state with result
-        calculatorState.currentInput = result.toString();
-        calculatorState.previousInput = result.toString();
-        calculatorState.operator = null;
-        calculatorState.waitingForOperand = true;
-
-        updateDisplay();
-    } catch (error) {
-        displayError('Calculation error');
-    }
-}
-
-/**
- * Handles repeat equals functionality
- * Applies the last operation to the current value
- */
-function repeatLastOperation() {
-    if (!calculatorState.lastOperation) {
-        return;
-    }
-
-    const current = parseFloat(calculatorState.currentInput);
-    const { operator, operand } = calculatorState.lastOperation;
-    let result;
-
-    try {
-        switch (operator) {
-            case '+':
-                result = current + operand;
-                break;
-            case '-':
-                result = current - operand;
-                break;
-            case '×':
-                result = current * operand;
-                break;
-            case '÷':
-                if (operand === 0) {
-                    displayError('Cannot divide by zero');
-                    return;
-                }
-                result = current / operand;
-                break;
-            default:
-                return;
-        }
-
-        if (!isFinite(result)) {
-            displayError('Invalid calculation');
-            return;
-        }
-
-        result = parseFloat(result.toFixed(10));
-        calculatorState.currentInput = result.toString();
-        calculatorState.previousInput = result.toString();
-        updateDisplay();
-    } catch (error) {
-        displayError('Calculation error');
-    }
-}
-
-/**
- * Clears the calculator to initial state
+ * Clears the calculator to initial state (VS-04 compatible)
  */
 function clearCalculator() {
-    calculatorState.currentInput = '0';
-    calculatorState.previousInput = null;
-    calculatorState.operator = null;
-    calculatorState.waitingForOperand = false;
-    calculatorState.hasError = false;
-    calculatorState.lastOperation = null;
+  calculatorState.currentValue = "0";
+  calculatorState.currentInput = "0";
+  calculatorState.previousValue = "";
+  calculatorState.operation = "";
+  calculatorState.awaitingOperand = false;
+  calculatorState.expressionTokens = [];
+  calculatorState.displayError = false;
+  calculatorState.displayErrorMessage = "";
 
-    if (displayElement && displayElement.classList) {
-        displayElement.classList.remove('error');
-    }
-    updateDisplay();
-}
-
-/**
- * Displays an error message
- * @param {string} message - The error message to display
- */
-function displayError(message) {
-    calculatorState.hasError = true;
-
-    if (displayElement && displayElement.textContent !== undefined) {
-        displayElement.textContent = message;
-        displayElement.classList.add('error');
-    }
-}
-
-/**
- * Handles equals button click
- */
-function handleEqualsClick() {
-    if (calculatorState.hasError) {
-        return;
-    }
-
-    // If we already evaluated, repeat the last operation
-    if (calculatorState.waitingForOperand && calculatorState.lastOperation) {
-        repeatLastOperation();
-    } else {
-        evaluateExpression();
-    }
-}
-
-/**
- * Handles clear button click
- */
-function handleClearClick() {
-    clearCalculator();
+  if (displayElement && displayElement.classList) {
+    displayElement.classList.remove('error');
+  }
+  updateDisplay();
 }
 
 // ===================================
@@ -439,6 +277,8 @@ function initializeEventListeners() {
   });
   const equalsBtn = document.getElementById("equalsBtn");
   if (equalsBtn) equalsBtn.addEventListener("click", handleEquals);
+  const clearBtn = document.getElementById("clearBtn");
+  if (clearBtn) clearBtn.addEventListener("click", clearCalculator);
   document.addEventListener("keydown", handleKeydown);
 }
 
@@ -477,6 +317,7 @@ if (typeof module !== "undefined" && module.exports) {
     updateDisplay,
     selectOperator,
     handleEquals,
+    clearCalculator,
     OPERATOR_MAP
   };
 }
