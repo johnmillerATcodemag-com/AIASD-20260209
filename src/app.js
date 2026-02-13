@@ -992,7 +992,10 @@ function highlightButton(selector) {
  */
 document.addEventListener('DOMContentLoaded', () => {
   console.log('Web Calculator initialized');
-  console.log('Implemented: VS-01 through VS-07, VS-09, VS-10, VS-12, VS-13, VS-19');
+  console.log('Implemented: VS-01-07, VS-09-17, VS-19, VS-22');
+
+  // VS-22: Load theme preference
+  loadTheme();
 
   // VS-01: Initialize display
   updateDisplay();
@@ -1136,6 +1139,12 @@ document.addEventListener('DOMContentLoaded', () => {
     taxBtn.addEventListener('click', showTaxTemplate);
   }
 
+  // VS-22: Add event listener for theme button
+  const themeBtn = document.getElementById('themeBtn');
+  if (themeBtn) {
+    themeBtn.addEventListener('click', toggleTheme);
+  }
+
   // Log state for debugging
   console.log('Initial state:', calculatorState);
   console.log('History state:', historyState);
@@ -1145,6 +1154,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Log when ready
 console.log('Calculator application loaded');
+
+/* ==========================================================================
+   VS-22: Theme Customization
+   ========================================================================== */
+
+let currentTheme = localStorage.getItem('calcTheme') || 'light';
+
+function toggleTheme() {
+  currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+  document.body.classList.toggle('dark-theme', currentTheme === 'dark');
+  localStorage.setItem('calcTheme', currentTheme);
+}
+
+function loadTheme() {
+  if (currentTheme === 'dark') {
+    document.body.classList.add('dark-theme');
+  }
+}
 
 /* ==========================================================================
    VS-16: Calculation Templates
