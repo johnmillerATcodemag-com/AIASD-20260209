@@ -191,6 +191,44 @@ body {
   opacity: 1;
 }
 
+/* VS-14: Undo/Redo buttons */
+.btn-undo,
+.btn-redo {
+  position: absolute;
+  bottom: var(--spacing-xs);
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-undo {
+  left: var(--spacing-xs);
+}
+
+.btn-redo {
+  left: 50px;
+}
+
+.btn-undo:hover:not(:disabled),
+.btn-redo:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.btn-undo:active:not(:disabled),
+.btn-redo:active:not(:disabled) {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.btn-undo:disabled,
+.btn-redo:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
 /* ==========================================================================
    VS-02+: Button Grid (will be populated in later slices)
    ========================================================================== */

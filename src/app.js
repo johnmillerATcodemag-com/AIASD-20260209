@@ -22,6 +22,64 @@ const calculatorState = {
 };
 
 /* ==========================================================================
+   VS-14: Undo/Redo State
+   ========================================================================== */
+
+const undoRedoState = {
+  history: [],
+  currentIndex: -1,
+  maxHistory: 20
+};
+
+function saveStateSnapshot() {
+  const snapshot = {
+    currentValue: calculatorState.currentValue,
+    previousValue: calculatorState.previousValue,
+    operation: calculatorState.operation,
+    awaitingOperand: calculatorState.awaitingOperand
+  };
+
+  undoRedoState.history = undoRedoState.history.slice(0, undoRedoState.currentIndex + 1);
+  undoRedoState.history.push(snapshot);
+
+  if (undoRedoState.history.length > undoRedoState.maxHistory) {
+    undoRedoState.history.shift();
+  } else {
+    undoRedoState.currentIndex++;
+  }
+
+  updateUndoRedoButtons();
+}
+
+function undo() {
+  if (undoRedoState.currentIndex > 0) {
+    undoRedoState.currentIndex--;
+    const snapshot = undoRedoState.history[undoRedoState.currentIndex];
+    Object.assign(calculatorState, snapshot);
+    updateDisplay();
+    updateUndoRedoButtons();
+  }
+}
+
+function redo() {
+  if (undoRedoState.currentIndex < undoRedoState.history.length - 1) {
+    undoRedoState.currentIndex++;
+    const snapshot = undoRedoState.history[undoRedoState.currentIndex];
+    Object.assign(calculatorState, snapshot);
+    updateDisplay();
+    updateUndoRedoButtons();
+  }
+}
+
+function updateUndoRedoButtons() {
+  const undoBtn = document.getElementById('undoBtn');
+  const redoBtn = document.getElementById('redoBtn');
+
+  if (undoBtn) undoBtn.disabled = undoRedoState.currentIndex <= 0;
+  if (redoBtn) redoBtn.disabled = undoRedoState.currentIndex >= undoRedoState.history.length - 1;
+}
+
+/* ==========================================================================
    VS-09: History State
    ========================================================================== */
 
@@ -97,6 +155,9 @@ function updateDisplay() {
  * Handle digit input (0-9)
  */
 function handleDigitInput(digit) {
+  // VS-14: Save state before change
+  saveStateSnapshot();
+
   // Clear error if present
   if (calculatorState.displayError) {
     calculatorState.displayError = false;
@@ -893,6 +954,20 @@ document.addEventListener('keydown', (event) => {
     pasteFromClipboard();
     return;
   }
+
+  // Undo (VS-14)
+  if ((event.ctrlKey || event.metaKey) && key === 'z' && !event.shiftKey) {
+    event.preventDefault();
+    undo();
+    return;
+  }
+
+  // Redo (VS-14)
+  if ((event.ctrlKey || event.metaKey) && (key === 'y' || (key === 'z' && event.shiftKey))) {
+    event.preventDefault();
+    redo();
+    return;
+  }
 });
 
 /**
@@ -1030,6 +1105,20 @@ document.addEventListener('DOMContentLoaded', () => {
   if (copyBtn) {
     copyBtn.addEventListener('click', copyToClipboard);
   }
+
+  // VS-14: Add event listeners for undo/redo buttons
+  const undoBtn = document.getElementById('undoBtn');
+  if (undoBtn) {
+    undoBtn.addEventListener('click', undo);
+  }
+
+  const redoBtn = document.getElementById('redoBtn');
+  if (redoBtn) {
+    redoBtn.addEventListener('click', redo);
+  }
+
+  // VS-14: Initialize with first state
+  saveStateSnapshot();
 
   // Log state for debugging
   console.log('Initial state:', calculatorState);
