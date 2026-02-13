@@ -46,16 +46,28 @@ const historyState = {
  */
 
 /**
- * VS-01: Update Display
+ * VS-01 & VS-15: Update Display
  * Reads calculator state and updates the display
  */
 function updateDisplay() {
   const displayElement = document.getElementById('display');
   const valueSpan = document.getElementById('displayValue');
+  const expressionDiv = document.getElementById('displayExpression');
 
   // Read state
   let value = calculatorState.currentValue;
   const isError = calculatorState.displayError;
+
+  // VS-15: Update expression display
+  if (expressionDiv) {
+    if (calculatorState.previousValue && calculatorState.operation) {
+      const operatorSymbols = { '+': '+', '-': '−', '*': '×', '/': '÷' };
+      const symbol = operatorSymbols[calculatorState.operation];
+      expressionDiv.textContent = `${calculatorState.previousValue} ${symbol}`;
+    } else {
+      expressionDiv.textContent = '';
+    }
+  }
 
   // Apply rendering logic
   if (isError) {
