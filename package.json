@@ -1,0 +1,10 @@
+{
+  "name": "aiasd-20260209",
+  "private": true,
+  "scripts": {
+    "test": "npm test --prefix web-calculator",
+    "test:vs08": "npm run test:vs08 --prefix web-calculator",
+    "test:calculator": "npm run test:calculator --prefix web-calculator",
+    "test:vs01": "npm run test:vs01 --prefix web-calculator"
+  }
+}
