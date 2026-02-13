@@ -12,11 +12,19 @@ This section documents artifacts created with AI assistance, including links to 
 
 - **[Web Calculator PRD](requirements/web-calculator-prd.md)** - Comprehensive Product Requirements Document for a web-based calculator application. Includes product vision, user personas, feature specifications, technical architecture, and launch plan. ([AI Log](ai-logs/2026/02/12/web-calc-prd-20260212-001/conversation.md))
 
+### Implementation Planning
+
+- **[Web Calculator Vertical Slice Implementation Plan](requirements/web-calculator-vertical-slice-plan.md)** - Complete 54-slice implementation plan for the Web Calculator application following vertical slice architecture principles. Includes requirements analysis with user story decomposition, comprehensive slice identification across 6 phases (MVP through V3.0), detailed dependency analysis (data, services, infrastructure), implementation sequencing with value/effort prioritization, detailed specifications for critical slices (MVP-005 CalculateResultCommand, V11-001 SaveCalculationCommand), 12-18 month phased roadmap with sprint-level MVP details, risk assessment covering 20+ identified risks with mitigation strategies, quality gates with validation checklists, and 29 measurable success metrics. ([AI Log](ai-logs/2026/02/12/web-calc-vslice-plan-20260212/conversation.md))
+
+- **[Web Calculator Vertical Slice Plan - Enhanced](requirements/web-calculator-vertical-slice-plan-enhanced.md)** - Comprehensive vertical slice implementation plan for the Web Calculator project. Includes detailed specifications for 7 vertical slices (Display, Input, Operations, Calculate, Clear, Delete, Responsive), dependency analysis, 5-phase implementation roadmap, 90+ test case definitions, validation criteria, risk assessments, and quality checklists. Follows guidelines from vertical-slice-planning instructions. ([AI Log](ai-logs/2026/02/12/web-calc-vslice-enhanced-20260212/conversation.md))
+
 ### Instruction Files
 
 - **[Vertical Slice Planning](.github/instructions/vertical-slice-planning.instructions.md)** - Comprehensive guide for planning and analyzing vertical slice architecture implementations. Covers requirements analysis, slice identification strategies, dependency mapping, implementation sequencing, and brownfield integration. ([AI Log](ai-logs/2026/02/12/vertical-slice-planning-instr-20260212/conversation.md))
 
 - **[Web Technologies Standards](.github/instructions/web-technologies.instructions.md)** - Canonical standards and best practices for HTML5, CSS3, and Vanilla JavaScript development. Covers semantic markup, accessibility (WCAG 2.1 AA), modern CSS layouts (Grid/Flexbox), responsive design, JavaScript module patterns, state management, performance optimization, security, and testing. ([AI Log](ai-logs/2026/02/12/web-tech-instructions-20260212/conversation.md))
+
+- **[Showcasing Features](.github/instructions/showcasing-features.instructions.md)** - A guide for showcasing new features to internal and external stakeholders.
 
 ## Repository Structure
 
