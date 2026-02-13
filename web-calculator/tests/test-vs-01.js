@@ -21,6 +21,7 @@ if (typeof document === 'undefined') {
     global.document = {
         readyState: 'complete',
         getElementById: () => ({ textContent: '0' }),
+        querySelector: () => null,
         querySelectorAll: () => [],
         addEventListener: () => {}
     };
