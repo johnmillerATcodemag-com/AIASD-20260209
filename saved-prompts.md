@@ -16,7 +16,7 @@ using #file:vertical-slice-planning.instructions.md and #file:web-calculator-imp
 
 update the implementation plan #file:web-calculator-vertical-slice-plan-enhanced.md with a diagram that shown the dependencies between slices and what slices can be implement in parallel.
 
-Include all vertical slices 1-30 and remove the sprint and duration estimates
+include all vertical slices 1-30 and remove the sprint and duration estimates
 
 i don't see the diagram in the #file:web-calculator-vertical-slice-plan-enhanced.md
 
@@ -43,4 +43,3 @@ Create separate files for each issue for easier automation
 remove the milestone: line from each VS-*.md file in the slices folder.
 
 go ahead and create the issues
-
