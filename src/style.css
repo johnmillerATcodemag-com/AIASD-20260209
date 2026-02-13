@@ -138,6 +138,50 @@ body {
   background: rgba(255, 255, 255, 0.4);
 }
 
+/* VS-13: Copy button in display */
+.btn-copy {
+  position: absolute;
+  top: var(--spacing-xs);
+  right: 50px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-copy:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.btn-copy:active {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* VS-13: Copy feedback toast */
+.copy-feedback {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(39, 174, 96, 0.95);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 10;
+}
+
+.copy-feedback.show {
+  opacity: 1;
+}
+
 /* ==========================================================================
    VS-02+: Button Grid (will be populated in later slices)
    ========================================================================== */

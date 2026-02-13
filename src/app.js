@@ -639,6 +639,81 @@ function handleSquare() {
 }
 
 /* ==========================================================================
+   VS-13: Copy/Paste Support
+   ========================================================================== */
+
+/**
+ * Copy current display value to clipboard
+ */
+async function copyToClipboard() {
+  const value = calculatorState.currentValue || '0';
+
+  try {
+    await navigator.clipboard.writeText(value);
+    showCopyFeedback();
+  } catch (err) {
+    console.error('Failed to copy:', err);
+    // Fallback for browsers without clipboard API
+    fallbackCopy(value);
+  }
+}
+
+/**
+ * Paste from clipboard and validate
+ */
+async function pasteFromClipboard() {
+  try {
+    const text = await navigator.clipboard.readText();
+    const trimmed = text.trim();
+
+    // Validate that it's a valid number
+    const parsed = parseFloat(trimmed);
+    if (!isNaN(parsed) && trimmed !== '') {
+      calculatorState.currentValue = trimmed;
+      calculatorState.awaitingOperand = false;
+      calculatorState.displayError = false;
+      updateDisplay();
+    }
+  } catch (err) {
+    console.error('Failed to paste:', err);
+  }
+}
+
+/**
+ * Show copy feedback toast
+ */
+function showCopyFeedback() {
+  const feedback = document.getElementById('copyFeedback');
+  if (feedback) {
+    feedback.classList.add('show');
+    setTimeout(() => {
+      feedback.classList.remove('show');
+    }, 1500);
+  }
+}
+
+/**
+ * Fallback copy method for older browsers
+ */
+function fallbackCopy(text) {
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  document.body.appendChild(textarea);
+  textarea.select();
+
+  try {
+    document.execCommand('copy');
+    showCopyFeedback();
+  } catch (err) {
+    console.error('Fallback copy failed:', err);
+  }
+
+  document.body.removeChild(textarea);
+}
+
+/* ==========================================================================
    VS-07: Keyboard Input Support
    ========================================================================== */
 
@@ -706,6 +781,20 @@ document.addEventListener('keydown', (event) => {
     event.preventDefault(); // Prevent browser back
     deleteLastDigit();
     highlightButton('.btn--delete');
+    return;
+  }
+
+  // Copy (VS-13)
+  if ((event.ctrlKey || event.metaKey) && key === 'c') {
+    event.preventDefault();
+    copyToClipboard();
+    return;
+  }
+
+  // Paste (VS-13)
+  if ((event.ctrlKey || event.metaKey) && key === 'v') {
+    event.preventDefault();
+    pasteFromClipboard();
     return;
   }
 });
@@ -832,6 +921,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const squareBtn = document.getElementById('squareBtn');
   if (squareBtn) {
     squareBtn.addEventListener('click', handleSquare);
+  }
+
+  // VS-13: Add event listener for copy button
+  const copyBtn = document.getElementById('copyBtn');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', copyToClipboard);
   }
 
   // Log state for debugging
