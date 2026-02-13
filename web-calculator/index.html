@@ -31,28 +31,40 @@ Source: johnmillerATcodemag-com
             <div class="calculator__buttons">
                 <!-- Clear Button -->
                 <button class="btn btn--clear" id="clearBtn" aria-label="Clear">C</button>
-                
+
                 <!-- Number Buttons (0-9) -->
                 <button class="btn btn--number" data-digit="7" aria-label="Seven">7</button>
                 <button class="btn btn--number" data-digit="8" aria-label="Eight">8</button>
                 <button class="btn btn--number" data-digit="9" aria-label="Nine">9</button>
-                
+                <button class="btn btn--operator" data-operator="+" aria-label="Add">+</button>
+
+                <!-- Row 2: 4 5 6 − -->
                 <button class="btn btn--number" data-digit="4" aria-label="Four">4</button>
                 <button class="btn btn--number" data-digit="5" aria-label="Five">5</button>
                 <button class="btn btn--number" data-digit="6" aria-label="Six">6</button>
-                
+                <button class="btn btn--operator" data-operator="-" aria-label="Subtract">−</button>
+
+                <!-- Row 3: 1 2 3 × -->
                 <button class="btn btn--number" data-digit="1" aria-label="One">1</button>
                 <button class="btn btn--number" data-digit="2" aria-label="Two">2</button>
                 <button class="btn btn--number" data-digit="3" aria-label="Three">3</button>
-                
+
                 <button class="btn btn--number btn--zero" data-digit="0" aria-label="Zero">0</button>
-                
+
                 <!-- Equals Button -->
                 <button class="btn btn--equals" id="equalsBtn" aria-label="Equals">=</button>
+                <button class="btn btn--operator" data-operator="×" aria-label="Multiply">×</button>
+
+                <!-- Row 4: 0 . = ÷ -->
+                <button class="btn btn--number" data-digit="0" aria-label="Zero">0</button>
+                <button class="btn btn--decimal" data-decimal="." aria-label="Decimal point">.</button>
+                <button class="btn btn--equals" id="equalsBtn" aria-label="Equals">=</button>
+                <button class="btn btn--operator" data-operator="÷" aria-label="Divide">÷</button>
             </div>
         </div>
     </main>
 
+    <script src="calculator.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
