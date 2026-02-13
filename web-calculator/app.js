@@ -39,6 +39,7 @@ const calculatorState = {
 
 let displayElement = null;
 let numberButtons = null;
+let backspaceButton = null;
 
 // ===================================
 // Core Functions
@@ -102,17 +103,78 @@ function handleNumberClick(event) {
     }
 }
 
+/**
+ * Deletes the last character from the current input
+ * Handles edge cases like single digit, empty input, and error states
+ */
+function deleteLastDigit() {
+    // Reset error state if present
+    if (calculatorState.displayError) {
+        calculatorState.displayError = false;
+        calculatorState.currentInput = '0';
+        updateDisplay();
+        return;
+    }
+    
+    // If current input has only one character (or just "0"), set to "0"
+    if (calculatorState.currentInput.length === 1) {
+        calculatorState.currentInput = '0';
+    }
+    // If current input is just a negative sign "-", set to "0"
+    else if (calculatorState.currentInput === '-') {
+        calculatorState.currentInput = '0';
+    }
+    // Otherwise, remove the last character
+    else {
+        calculatorState.currentInput = calculatorState.currentInput.slice(0, -1);
+        
+        // If result is empty or just a negative sign, set to "0"
+        if (calculatorState.currentInput === '' || calculatorState.currentInput === '-') {
+            calculatorState.currentInput = '0';
+        }
+    }
+    
+    updateDisplay();
+}
+
+/**
+ * Handles keyboard input events
+ * 
+ * @param {KeyboardEvent} event - The keyboard event
+ */
+function handleKeyboardInput(event) {
+    // Handle number keys (0-9)
+    if (event.key >= '0' && event.key <= '9') {
+        inputDigit(event.key);
+        event.preventDefault();
+    }
+    // Handle Backspace key
+    else if (event.key === 'Backspace') {
+        deleteLastDigit();
+        event.preventDefault();
+    }
+}
+
 // ===================================
 // Event Listeners
 // ===================================
 
 /**
- * Initialize event listeners for all number buttons
+ * Initialize event listeners for all buttons and keyboard
  */
 function initializeEventListeners() {
+    // Number button click handlers
     numberButtons.forEach(button => {
         button.addEventListener('click', handleNumberClick);
     });
+    
+    // Backspace button click handler
+    if (backspaceButton) {
+        backspaceButton.addEventListener('click', deleteLastDigit);
+    }
+    
+    // Keyboard input handler
+    document.addEventListener('keydown', handleKeyboardInput);
 }
 
 // ===================================
@@ -126,6 +188,7 @@ function initializeCalculator() {
     // Initialize DOM element references
     displayElement = document.getElementById('displayValue');
     numberButtons = document.querySelectorAll('.btn--number');
+    backspaceButton = document.getElementById('backspaceBtn');
     
     // Set initial display
     updateDisplay();
@@ -153,6 +216,8 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         calculatorState,
         inputDigit,
-        updateDisplay
+        updateDisplay,
+        deleteLastDigit,
+        handleKeyboardInput
     };
 }

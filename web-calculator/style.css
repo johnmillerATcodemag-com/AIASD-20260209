@@ -172,9 +172,19 @@ body {
     background: linear-gradient(135deg, #5568d3 0%, #65398b 100%);
 }
 
-/* Zero Button (spans 3 columns) */
+/* Zero Button (spans 2 columns) */
 .btn--zero {
-    grid-column: span 3;
+    grid-column: span 2;
+}
+
+/* Backspace Button */
+.btn--backspace {
+    background: linear-gradient(135deg, #f56565 0%, #c53030 100%);
+    font-size: 1.5rem;
+}
+
+.btn--backspace:hover {
+    background: linear-gradient(135deg, #e53e3e 0%, #9b2c2c 100%);
 }
 
 /* ===================================
