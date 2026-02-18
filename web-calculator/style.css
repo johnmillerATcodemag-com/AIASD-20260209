@@ -32,6 +32,16 @@ Source: johnmillerATcodemag-com
     --color-shadow-light: rgba(0, 0, 0, 0.1);
     --color-shadow-medium: rgba(0, 0, 0, 0.15);
     --color-focus: #4299e1;
+
+    /* History Panel Colors */
+    --color-history-title: #2d3748;
+    --color-history-border: #e2e8f0;
+    --color-history-item-bg: #f7fafc;
+    --color-history-item-hover: #edf2f7;
+    --color-history-item-text: #4a5568;
+    --color-history-item-result: #2d3748;
+    --color-history-clear: #e53e3e;
+    --color-history-clear-hover: #c53030;
     
     /* Spacing */
     --spacing-xs: 0.5rem;
@@ -66,9 +76,53 @@ body {
 }
 
 /* ===================================
+   Calculator Wrapper & History Toggle
+   =================================== */
+.calculator-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: center;
+    gap: var(--spacing-md);
+    width: 100%;
+    max-width: 900px;
+    position: relative;
+}
+
+.history-toggle {
+    order: 1;
+    flex: 0 0 auto;
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-btn-text);
+    background: #2d3748;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    box-shadow: 0 2px 8px var(--color-shadow-light);
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.history-toggle:hover {
+    background: #1a202c;
+    transform: translateY(-2px);
+}
+
+.history-toggle:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+}
+
+.history-toggle[aria-expanded="true"] {
+    background: #1a202c;
+}
+
+/* ===================================
    Calculator Container
    =================================== */
 .calculator-container {
+    order: 2;
     width: 100%;
     max-width: 400px;
     padding: var(--spacing-sm);
@@ -261,6 +315,22 @@ body {
     .btn {
         border: 2px solid var(--color-btn-text);
     }
+
+    .history-toggle {
+        border: 2px solid var(--color-btn-text);
+    }
+
+    .history-panel {
+        border: 2px solid var(--color-display-bg);
+    }
+
+    .history-panel__clear {
+        border: 2px solid var(--color-btn-text);
+    }
+
+    .history-item {
+        border-width: 2px;
+    }
 }
 
 /* Reduced Motion Support */
@@ -289,5 +359,148 @@ body {
     .btn:focus-visible {
         outline: 3px solid var(--color-focus);
         outline-offset: 2px;
+    }
+}
+
+/* ===================================
+   History Panel (VS-09)
+   =================================== */
+.history-panel {
+    order: 3;
+    flex: 0 1 320px;
+    min-width: 280px;
+    max-width: 360px;
+    background: var(--color-bg-calculator);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    box-shadow: 0 10px 40px var(--color-shadow-light), 0 20px 80px var(--color-shadow-medium);
+    max-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(0);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform 0.25s ease, opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.history-panel--open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.history-panel__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 2px solid var(--color-history-border);
+}
+
+.history-panel__title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-history-title);
+}
+
+.history-panel__clear {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-btn-text);
+    background: var(--color-history-clear);
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.history-panel__clear:hover {
+    background: var(--color-history-clear-hover);
+}
+
+.history-panel__clear:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+}
+
+.history-list {
+    list-style: none;
+    overflow-y: auto;
+    flex: 1 1 auto;
+    margin: 0;
+    padding: 0;
+}
+
+.history-item-wrapper {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.history-item-wrapper + .history-item-wrapper {
+    margin-top: var(--spacing-xs);
+}
+
+.history-item {
+    display: block;
+    width: 100%;
+    padding: var(--spacing-sm);
+    background: var(--color-history-item-bg);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-history-border);
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.history-item:hover {
+    background: var(--color-history-item-hover);
+    border-color: var(--color-focus);
+}
+
+.history-item:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+}
+
+.history-item__expression {
+    font-size: 0.9rem;
+    color: var(--color-history-item-text);
+    word-break: break-all;
+}
+
+.history-item__result {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-history-item-result);
+    font-family: var(--font-family-display);
+}
+
+/* History panel responsive: overlay on small screens */
+@media (max-width: 768px) {
+    .calculator-wrapper {
+        flex-direction: column;
+    }
+
+    .history-panel {
+        order: 3;
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        max-width: 100%;
+        width: 300px;
+        max-height: 100vh;
+        border-radius: 0;
+        z-index: 100;
+        transform: translateX(100%);
+    }
+
+    .history-panel--open {
+        transform: translateX(0);
     }
 }

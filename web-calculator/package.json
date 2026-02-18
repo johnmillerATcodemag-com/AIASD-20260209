@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "test": "node tests/calculator.test.js && node tests/test-vs-01.js",
+    "test": "node tests/calculator.test.js && node tests/test-vs-01.js && node tests/app.test.js",
     "test:calculator": "node tests/calculator.test.js",
-    "test:vs01": "node tests/test-vs-01.js"
+    "test:vs01": "node tests/test-vs-01.js",
+    "test:app": "node tests/app.test.js"
   }
 }

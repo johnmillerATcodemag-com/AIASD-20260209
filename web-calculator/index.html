@@ -20,7 +20,9 @@ Source: johnmillerATcodemag-com
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <main class="calculator-container">
+    <main class="calculator-wrapper">
+        <button type="button" class="history-toggle" id="historyToggle" aria-label="Show calculation history" aria-expanded="false" aria-controls="historyPanel">History</button>
+        <div class="calculator-container">
         <div class="calculator" role="application" aria-label="Calculator">
             <!-- Display Area -->
             <div class="calculator__display" id="display" role="status" aria-live="polite" aria-atomic="true">
@@ -54,6 +56,14 @@ Source: johnmillerATcodemag-com
                 <button class="btn btn--operator" data-operator="÷" aria-label="Divide">÷</button>
             </div>
         </div>
+        </div>
+        <aside class="history-panel" id="historyPanel" role="region" aria-label="Calculation history" aria-hidden="true">
+            <div class="history-panel__header">
+                <h2 class="history-panel__title">History</h2>
+                <button type="button" class="history-panel__clear" id="clearHistoryBtn" aria-label="Clear history">Clear History</button>
+            </div>
+            <ul class="history-list" id="historyList" role="list"></ul>
+        </aside>
     </main>
 
     <script src="calculator.js"></script>
